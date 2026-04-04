@@ -18,9 +18,9 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
     scene.background = new THREE.Color(0xf8fbff)
     sceneRef.current = scene
 
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100)
-    const stackHeight = frames.length * 1.2
-    camera.position.set(0, stackHeight / 2, Math.max(15, stackHeight * 0.8))
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200)
+    const stackHeight = frames.length * 1.5
+    camera.position.set(0, stackHeight / 2, Math.max(30, stackHeight * 1.3))
     camera.lookAt(0, stackHeight / 2, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
@@ -37,54 +37,57 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
     directional.shadow.mapSize.height = 1024
     scene.add(ambient, directional)
 
-    const grid = new THREE.GridHelper(20, 20, 0xaaaaaa, 0xdddddd)
+    const grid = new THREE.GridHelper(30, 30, 0xcccccc, 0xeeeeee)
     grid.position.y = -0.5
     scene.add(grid)
 
     frameMeshesRef.current = []
 
-    const colors = [
-      0x2563eb, // blue
-      0x7c3aed, // purple
-      0xdc2626, // red
-      0xea580c, // orange
-      0x16a34a, // green
-    ]
-
     frames.forEach((frame, index) => {
-      const color = colors[index % colors.length]
-      const geometry = new THREE.BoxGeometry(1.2, 0.8, 1.2)
+      // 단순 회색톤 사용
+      const grayShade = 0.3 + (index % 3) * 0.25
+      const color = new THREE.Color(grayShade, grayShade, grayShade)
+      
+      const geometry = new THREE.BoxGeometry(2, 1.2, 2)
       const material = new THREE.MeshStandardMaterial({
         color,
-        roughness: 0.5,
-        metalness: 0.2,
-        emissive: frame.returned ? color : 0x000000,
-        emissiveIntensity: frame.returned ? 0.3 : 0,
+        roughness: 0.6,
+        metalness: 0.1,
+        emissive: frame.returned ? 0x2563eb : 0x000000,
+        emissiveIntensity: frame.returned ? 0.4 : 0,
       })
 
       const mesh = new THREE.Mesh(geometry, material)
       mesh.castShadow = true
       mesh.receiveShadow = true
-      mesh.position.set(0, index * 1.2 + 0.4, 0)
+      mesh.position.set(0, index * 1.5 + 0.6, 0)
 
+      // 큰 텍스트 캔버스로 가독성 개선
       const textCanvas = document.createElement('canvas')
-      textCanvas.width = 256
-      textCanvas.height = 128
+      textCanvas.width = 512
+      textCanvas.height = 256
       const textCtx = textCanvas.getContext('2d')
       if (textCtx) {
-        textCtx.fillStyle = '#fff'
-        textCtx.font = 'bold 36px Arial'
+        // 검은색 배경 추가
+        textCtx.fillStyle = '#000000'
+        textCtx.fillRect(0, 0, 512, 256)
+        
+        // 흰색 텍스트
+        textCtx.fillStyle = '#ffffff'
+        textCtx.font = 'bold 56px Arial'
         textCtx.textAlign = 'center'
         textCtx.textBaseline = 'middle'
-        textCtx.fillText(`factorial(${frame.n})`, 128, 40)
-        textCtx.font = '24px Arial'
-        textCtx.fillText(frame.returned ? `= ${frame.returnValue}` : '...', 128, 90)
+        textCtx.fillText(`factorial(${frame.n})`, 256, 70)
+        
+        textCtx.font = '42px Arial'
+        textCtx.fillStyle = '#64b5f6'
+        textCtx.fillText(frame.returned ? `= ${frame.returnValue}` : '...', 256, 160)
 
         const texture = new THREE.CanvasTexture(textCanvas)
-        const labelMaterial = new THREE.MeshBasicMaterial({ map: texture })
-        const labelGeometry = new THREE.PlaneGeometry(1.5, 0.6)
+        const labelMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })
+        const labelGeometry = new THREE.PlaneGeometry(2.2, 1)
         const labelMesh = new THREE.Mesh(labelGeometry, labelMaterial)
-        labelMesh.position.z = 0.65
+        labelMesh.position.z = 1.05
         mesh.add(labelMesh)
       }
 
@@ -114,9 +117,10 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
 
       if (shouldAnimate) {
         frameMeshesRef.current.forEach((mesh, i) => {
-          mesh.rotation.y += 0.005
+          // 회전 애니메이션 제거 - 정보 시각화에만 집중
           if (frames[i]?.returned) {
-            mesh.position.y = i * 1.2 + 0.4 + Math.sin(now * 0.003 + i) * 0.1
+            // 반환된 박스는 살짝 위아래로 움직임
+            mesh.position.y = i * 1.5 + 0.6 + Math.sin(now * 0.002 + i) * 0.08
           }
         })
         renderer.render(scene, camera)
