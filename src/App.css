@@ -92,6 +92,7 @@
   display: grid;
   grid-template-columns: minmax(420px, 0.95fr) minmax(560px, 1.05fr);
   gap: 10px;
+  min-height: calc(100vh - 180px);
 }
 
 .editor-pane,
@@ -100,7 +101,7 @@
   background: #fff;
   border-radius: 8px;
   padding: 10px;
-  min-height: 720px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -137,6 +138,7 @@
   background: #f9fafb;
   border: 1px solid #d1d5db;
   border-radius: 8px;
+  min-height: 0;
 }
 
 .app-shell .control-deck {
@@ -194,14 +196,122 @@
   color: #374151;
 }
 
+.app-shell .game-viz {
+  padding: 12px;
+  color: #111827;
+}
+
+.app-shell .viz-caption,
+.app-shell .status-card p,
+.app-shell .event-feed-header span,
+.app-shell .feed-entry p,
+.app-shell .telemetry-card span,
+.app-shell .result-pill,
+.app-shell .peg-labels span,
+.app-shell .call-frame span,
+.app-shell .peg-state-card span {
+  color: #374151;
+}
+
+.app-shell .world-chip,
+.app-shell .viz-mini-stats span,
+.app-shell .result-pill,
+.app-shell .call-frame,
+.app-shell .peg-state-card,
+.app-shell .hanoi-sidebar,
+.app-shell .factorial-prize,
+.app-shell .hanoi-stage,
+.app-shell .tree-scroll {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.app-shell .feed-entry {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.app-shell .world-chip {
+  color: #1f2937;
+}
+
+.app-shell .viz-mini-stats span {
+  color: #1f2937;
+}
+
+.app-shell .stack-depth {
+  color: #475569;
+}
+
+.app-shell .factorial-prize p,
+.app-shell .stack-frame p {
+  color: #1f2937;
+}
+
+.app-shell .fib-node text {
+  fill: #111827;
+}
+
+.app-shell .blockly-host {
+  height: 100%;
+  min-height: 680px;
+  background: #fff;
+}
+
+.app-shell .python-editor {
+  min-height: 680px;
+  background: #fff;
+  color: #111827;
+}
+
+.app-shell .blocklySvg {
+  background: #ffffff !important;
+}
+
+.app-shell .blocklyMainBackground {
+  stroke: #e5e7eb !important;
+}
+
+.app-shell .blocklyToolboxDiv {
+  background: #f8fafc !important;
+  color: #111827 !important;
+  border-right: 1px solid #d1d5db !important;
+}
+
+.app-shell .blocklyFlyoutBackground {
+  fill: #ffffff !important;
+}
+
+.app-shell .blocklyTreeRow:not(.blocklyTreeSelected):hover {
+  background: #e5e7eb !important;
+}
+
+.app-shell .blocklyTreeSelected {
+  background: #bfdbfe !important;
+}
+
+.app-shell .blocklyTreeLabel {
+  color: #111827 !important;
+}
+
+.app-shell .blocklyScrollbarHandle {
+  fill: #9ca3af !important;
+}
+
+.app-shell .blocklyZoom > image,
+.app-shell .blocklyTrash > image {
+  filter: none;
+}
+
 @media (max-width: 1120px) {
   .workspace {
     grid-template-columns: 1fr;
+    min-height: auto;
   }
 
   .editor-pane,
   .preview-pane {
-    min-height: 620px;
+    min-height: 560px;
   }
 
   .stage-summary {

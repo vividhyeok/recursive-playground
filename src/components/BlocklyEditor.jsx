@@ -6,6 +6,7 @@ function BlocklyEditor({ stage, workspaceData, onWorkspaceChange }) {
   const workspaceRef = useRef(null)
   const applyingExternalStateRef = useRef(false)
   const initialWorkspaceRef = useRef(workspaceData)
+  const serializedWorkspaceRef = useRef('')
 
   useEffect(() => {
     const { Blockly } = setupBlockly()
@@ -32,18 +33,34 @@ function BlocklyEditor({ stage, workspaceData, onWorkspaceChange }) {
       workspace.clear()
       Blockly.serialization.workspaces.load(data, workspace)
       Blockly.svgResize(workspace)
+      serializedWorkspaceRef.current = JSON.stringify(
+        Blockly.serialization.workspaces.save(workspace),
+      )
       applyingExternalStateRef.current = false
     }
 
     loadWorkspace(initialWorkspaceRef.current)
 
-    const handleChange = () => {
+    const handleChange = (event) => {
       if (applyingExternalStateRef.current) {
         return
       }
 
+      if (event?.isUiEvent) {
+        return
+      }
+
+      const nextWorkspaceData = Blockly.serialization.workspaces.save(workspace)
+      const nextSerialized = JSON.stringify(nextWorkspaceData)
+
+      if (nextSerialized === serializedWorkspaceRef.current) {
+        return
+      }
+
+      serializedWorkspaceRef.current = nextSerialized
+
       onWorkspaceChange({
-        workspaceData: Blockly.serialization.workspaces.save(workspace),
+        workspaceData: nextWorkspaceData,
         code: generateCodeForFunction(workspace, stage.functionBlockType),
       })
     }
@@ -69,10 +86,18 @@ function BlocklyEditor({ stage, workspaceData, onWorkspaceChange }) {
       return
     }
 
+    const nextSerialized = JSON.stringify(workspaceData)
+    if (nextSerialized === serializedWorkspaceRef.current) {
+      return
+    }
+
     applyingExternalStateRef.current = true
     workspace.clear()
     Blockly.serialization.workspaces.load(workspaceData, workspace)
     Blockly.svgResize(workspace)
+    serializedWorkspaceRef.current = JSON.stringify(
+      Blockly.serialization.workspaces.save(workspace),
+    )
     applyingExternalStateRef.current = false
   }, [workspaceData])
 
