@@ -6,6 +6,7 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
   const mountRef = useRef(null)
   const sceneRef = useRef(null)
   const frameMeshesRef = useRef([])
+  const rendererRef = useRef(null)
 
   const { frames, finalResult } = useMemo(() => deriveFactorialFrames(visibleTrace), [visibleTrace])
 
@@ -18,12 +19,14 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
     sceneRef.current = scene
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100)
-    camera.position.set(0, 8, 12)
-    camera.lookAt(0, 4, 0)
+    const stackHeight = frames.length * 1.2
+    camera.position.set(0, stackHeight / 2, Math.max(15, stackHeight * 0.8))
+    camera.lookAt(0, stackHeight / 2, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.shadowMap.enabled = true
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    rendererRef.current = renderer
     mountNode.appendChild(renderer.domElement)
 
     const ambient = new THREE.AmbientLight(0xffffff, 0.8)
@@ -102,17 +105,23 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
     resizeObserver.observe(mountNode)
 
     let animationId
+    let lastRenderTime = Date.now()
     const animate = () => {
       animationId = requestAnimationFrame(animate)
 
-      frameMeshesRef.current.forEach((mesh, i) => {
-        mesh.rotation.y += 0.005
-        if (frames[i]?.returned) {
-          mesh.position.y = i * 1.2 + 0.4 + Math.sin(Date.now() * 0.003 + i) * 0.1
-        }
-      })
+      const now = Date.now()
+      const shouldAnimate = now - lastRenderTime > 16 // ~60 FPS
 
-      renderer.render(scene, camera)
+      if (shouldAnimate) {
+        frameMeshesRef.current.forEach((mesh, i) => {
+          mesh.rotation.y += 0.005
+          if (frames[i]?.returned) {
+            mesh.position.y = i * 1.2 + 0.4 + Math.sin(now * 0.003 + i) * 0.1
+          }
+        })
+        renderer.render(scene, camera)
+        lastRenderTime = now
+      }
     }
 
     animationId = requestAnimationFrame(animate)
@@ -124,28 +133,35 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
       frameMeshesRef.current.forEach((mesh) => {
         mesh.geometry.dispose()
         if (Array.isArray(mesh.material)) {
-          mesh.material.forEach((m) => m.dispose())
+          mesh.material.forEach((m) => {
+            if (m.map) m.map.dispose()
+            m.dispose()
+          })
         } else {
+          if (mesh.material.map) mesh.material.map.dispose()
           mesh.material.dispose()
         }
       })
-      mountNode.removeChild(renderer.domElement)
+      if (mountNode.contains(renderer.domElement)) {
+        mountNode.removeChild(renderer.domElement)
+      }
     }
   }, [frames])
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
+    <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
       <div
         ref={mountRef}
         style={{
+          flex: 1,
           width: '100%',
-          height: '100%',
+          minHeight: 0,
           borderRadius: '8px',
           overflow: 'hidden',
         }}
       />
-      <div style={{ marginTop: '10px', fontSize: '0.9rem', color: '#475569' }}>
-        {finalResult !== null ? `결과: factorial(5) = ${finalResult}` : '실행하면 호출 스택이 3D로 쌓입니다'}
+      <div style={{ paddingTop: '8px', fontSize: '0.85rem', color: '#64748b' }}>
+        {finalResult !== null ? `결과: ${finalResult}` : '실행 중...'}
       </div>
     </div>
   )
