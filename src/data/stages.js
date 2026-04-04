@@ -7,6 +7,10 @@ function buildBlockNode(descriptor) {
     type: descriptor.type,
   }
 
+  if (descriptor.fields) {
+    node.fields = descriptor.fields
+  }
+
   if (descriptor.body?.length) {
     node.inputs = {
       BODY: {
@@ -102,13 +106,21 @@ function parseFactorial(code) {
 
     if (
       line.indent === 1 &&
-      /^if\s+n\s*==\s*1\s*:$/.test(line.text) &&
+      /^if\s+n\s*==\s*\d+\s*:$/.test(line.text) &&
       nextLine?.indent === 2 &&
-      /^return\s+1$/.test(nextLine.text)
+      /^return\s+\d+$/.test(nextLine.text)
     ) {
+      const baseValue = line.text.match(/\d+/)?.[0] ?? '1'
+      const returnValue = nextLine.text.match(/\d+/)?.[0] ?? '1'
       types.push({
-        type: 'rp_factorial_if_base',
-        body: ['rp_factorial_return_one'],
+        type: 'rp_factorial_if_equals',
+        fields: { BASE_N: String(baseValue) },
+        body: [
+          {
+            type: 'rp_factorial_return_const',
+            fields: { RET_N: String(returnValue) },
+          },
+        ],
       })
       index += 1
       continue
@@ -139,15 +151,38 @@ function parseFibonacci(code) {
 
     if (
       line.indent === 1 &&
-      /^if\s+n\s*<=\s*1\s*:$/.test(line.text) &&
+      /^if\s+n\s*<=\s*\d+\s*:$/.test(line.text) &&
       nextLine?.indent === 2 &&
       /^return\s+n$/.test(nextLine.text)
     ) {
+      const baseValue = line.text.match(/\d+/)?.[0] ?? '1'
       types.push({
-        type: 'rp_fibonacci_if_base',
+        type: 'rp_fibonacci_if_leq',
+        fields: { BASE_N: String(baseValue) },
         body: ['rp_fibonacci_return_n'],
       })
       index += 1
+      continue
+    }
+
+    if (
+      line.indent === 1 &&
+      /^left\s*=\s*fib\s*\(\s*n\s*-\s*1\s*\)$/.test(line.text)
+    ) {
+      types.push('rp_fibonacci_assign_left')
+      continue
+    }
+
+    if (
+      line.indent === 1 &&
+      /^right\s*=\s*fib\s*\(\s*n\s*-\s*2\s*\)$/.test(line.text)
+    ) {
+      types.push('rp_fibonacci_assign_right')
+      continue
+    }
+
+    if (line.indent === 1 && /^return\s+left\s*\+\s*right$/.test(line.text)) {
+      types.push('rp_fibonacci_return_sum')
       continue
     }
 
@@ -247,8 +282,8 @@ export const STAGES = {
     toolbox: {
       kind: 'flyoutToolbox',
       contents: [
-        { kind: 'block', type: 'rp_factorial_if_base' },
-        { kind: 'block', type: 'rp_factorial_return_one' },
+        { kind: 'block', type: 'rp_factorial_if_equals' },
+        { kind: 'block', type: 'rp_factorial_return_const' },
         { kind: 'block', type: 'rp_factorial_return_recursive' },
       ],
     },
@@ -266,7 +301,7 @@ export const STAGES = {
     concept:
       '이진 재귀는 가지를 넓게 펼치며, 같은 작은 문제를 여러 번 다시 푸는 비효율도 눈에 띄게 드러냅니다.',
     objective: 'fib(6)이 8이 되도록 함수를 완성하세요.',
-    modeHint: '기저 조건 하나와 두 갈래로 갈라지는 재귀 반환식이 모두 필요합니다.',
+    modeHint: '기저 조건 + left/right 재귀 호출을 분리해서 계산한 뒤 합산 반환해야 합니다.',
     worldName: '분기 숲',
     missionName: '쌍둥이 노드 추적',
     arenaName: '재귀 성장 지도',
@@ -280,9 +315,11 @@ export const STAGES = {
     toolbox: {
       kind: 'flyoutToolbox',
       contents: [
-        { kind: 'block', type: 'rp_fibonacci_if_base' },
+        { kind: 'block', type: 'rp_fibonacci_if_leq' },
         { kind: 'block', type: 'rp_fibonacci_return_n' },
-        { kind: 'block', type: 'rp_fibonacci_return_recursive' },
+        { kind: 'block', type: 'rp_fibonacci_assign_left' },
+        { kind: 'block', type: 'rp_fibonacci_assign_right' },
+        { kind: 'block', type: 'rp_fibonacci_return_sum' },
       ],
     },
     defaultWorkspace: () => buildWorkspace('rp_fibonacci_function'),

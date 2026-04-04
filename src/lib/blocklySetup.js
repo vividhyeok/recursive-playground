@@ -31,15 +31,32 @@ function buildStatementBlock(type, label, color) {
   }
 }
 
-function buildIfBlock(type, label, color) {
+function buildIfNumericBlock(type, leftLabel, fieldName, rightLabel, color, defaultValue = 1) {
   Blockly.Blocks[type] = {
     init() {
-      this.appendDummyInput().appendField(label)
+      this.appendDummyInput()
+        .appendField(leftLabel)
+        .appendField(new Blockly.FieldNumber(defaultValue, -999, 999, 1), fieldName)
+        .appendField(rightLabel)
       this.appendStatementInput('BODY').setCheck('rpStatement')
       this.setPreviousStatement(true, 'rpStatement')
       this.setNextStatement(true, 'rpStatement')
       this.setColour(color)
-      this.setTooltip(label)
+      this.setTooltip(leftLabel)
+    },
+  }
+}
+
+function buildReturnNumericBlock(type, fieldName, color, defaultValue = 1) {
+  Blockly.Blocks[type] = {
+    init() {
+      this.appendDummyInput()
+        .appendField('return')
+        .appendField(new Blockly.FieldNumber(defaultValue, -999, 999, 1), fieldName)
+      this.setPreviousStatement(true, 'rpStatement')
+      this.setNextStatement(true, 'rpStatement')
+      this.setColour(color)
+      this.setTooltip('상수 반환')
     },
   }
 }
@@ -53,12 +70,15 @@ function registerBlocks() {
     22,
   )
 
-  buildIfBlock('rp_factorial_if_base', 'if n == 1', 270)
-  buildStatementBlock('rp_factorial_return_one', 'return 1', 250)
+  buildIfNumericBlock('rp_factorial_if_equals', 'if n ==', 'BASE_N', '', 270, 1)
+  buildReturnNumericBlock('rp_factorial_return_const', 'RET_N', 250, 1)
   buildStatementBlock('rp_factorial_return_recursive', 'return n * factorial(n - 1)', 232)
 
-  buildIfBlock('rp_fibonacci_if_base', 'if n <= 1', 180)
+  buildIfNumericBlock('rp_fibonacci_if_leq', 'if n <=', 'BASE_N', '', 180, 1)
   buildStatementBlock('rp_fibonacci_return_n', 'return n', 150)
+  buildStatementBlock('rp_fibonacci_assign_left', 'left = fib(n - 1)', 134)
+  buildStatementBlock('rp_fibonacci_assign_right', 'right = fib(n - 2)', 126)
+  buildStatementBlock('rp_fibonacci_return_sum', 'return left + right', 114)
   buildStatementBlock('rp_fibonacci_return_recursive', 'return fib(n - 1) + fib(n - 2)', 116)
 
   // 레거시 저장 상태 호환용 블록
@@ -107,22 +127,33 @@ function registerBlocks() {
     return `def hanoi(n, from_peg, to_peg, aux_peg):\n${body}`
   }
 
-  pythonGenerator.forBlock.rp_factorial_if_base = function factorialIfBase(block, generator) {
+  pythonGenerator.forBlock.rp_factorial_if_equals = function factorialIfBase(block, generator) {
+    const baseValue = Number(block.getFieldValue('BASE_N'))
     const body = generator.statementToCode(block, 'BODY') || '    pass\n'
-    return `if n == 1:\n${body}`
+    return `if n == ${baseValue}:\n${body}`
   }
 
-  pythonGenerator.forBlock.rp_factorial_return_one = () => 'return 1\n'
+  pythonGenerator.forBlock.rp_factorial_return_const = (block) => {
+    const returnValue = Number(block.getFieldValue('RET_N'))
+    return `return ${returnValue}\n`
+  }
 
   pythonGenerator.forBlock.rp_factorial_return_recursive = () =>
     'return n * factorial(n - 1)\n'
 
-  pythonGenerator.forBlock.rp_fibonacci_if_base = function fibonacciIfBase(block, generator) {
+  pythonGenerator.forBlock.rp_fibonacci_if_leq = function fibonacciIfBase(block, generator) {
+    const baseValue = Number(block.getFieldValue('BASE_N'))
     const body = generator.statementToCode(block, 'BODY') || '    pass\n'
-    return `if n <= 1:\n${body}`
+    return `if n <= ${baseValue}:\n${body}`
   }
 
   pythonGenerator.forBlock.rp_fibonacci_return_n = () => 'return n\n'
+
+  pythonGenerator.forBlock.rp_fibonacci_assign_left = () => 'left = fib(n - 1)\n'
+
+  pythonGenerator.forBlock.rp_fibonacci_assign_right = () => 'right = fib(n - 2)\n'
+
+  pythonGenerator.forBlock.rp_fibonacci_return_sum = () => 'return left + right\n'
 
   pythonGenerator.forBlock.rp_fibonacci_return_recursive = () =>
     'return fib(n - 1) + fib(n - 2)\n'

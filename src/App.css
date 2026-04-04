@@ -196,6 +196,24 @@
   color: #374151;
 }
 
+.preview-status {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.preview-status span {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+}
+
 .app-shell .game-viz {
   padding: 12px;
   color: #111827;
@@ -246,6 +264,49 @@
 .app-shell .factorial-prize p,
 .app-shell .stack-frame p {
   color: #1f2937;
+}
+
+.app-shell .factorial-world {
+  background: linear-gradient(180deg, #f8fbff, #edf4ff);
+  border: 1px solid #cfe0ff;
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.app-shell .factorial-rail {
+  background: linear-gradient(180deg, #2563eb, #38bdf8);
+  box-shadow: none;
+}
+
+.app-shell .stack-frame {
+  border-color: #bcd1f4;
+  box-shadow: 0 3px 8px rgba(30, 41, 59, 0.12);
+}
+
+.app-shell .fib-world {
+  background: linear-gradient(180deg, #f7fff8, #eefbf2);
+  border: 1px solid #c8ebd3;
+  border-radius: 14px;
+  padding: 8px;
+}
+
+.app-shell .fib-edge {
+  stroke: #16a34a;
+  filter: none;
+}
+
+.app-shell .fib-node rect {
+  fill: #dff6e5;
+  stroke: #8fd5a8;
+}
+
+.app-shell .fib-node.returned rect {
+  fill: #bbf7d0;
+}
+
+.app-shell .fib-node.duplicate rect {
+  fill: #fde68a;
+  stroke: #f59e0b;
 }
 
 .app-shell .fib-node text {
@@ -316,6 +377,10 @@
 
   .stage-summary {
     flex-wrap: wrap;
+  }
+
+  .preview-status {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

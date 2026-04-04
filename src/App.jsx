@@ -69,21 +69,6 @@ function summarizeTrace(events) {
   )
 }
 
-function formatEventLabel(event) {
-  if (event.type === 'call') {
-    const args = Object.entries(event.args ?? {})
-      .map(([key, value]) => `${key}=${value}`)
-      .join(', ')
-    return `${event.func}(${args}) 진입`
-  }
-
-  if (event.type === 'return') {
-    return `${event.func} 반환값 ${event.value}`
-  }
-
-  return `원반 이동 ${event.from} → ${event.to}`
-}
-
 function StageVisualization({ stageKey, execution, speed }) {
   const visibleTrace = execution.trace.slice(0, execution.playhead)
 
@@ -129,11 +114,6 @@ function App() {
     [activeExecution.playhead, activeExecution.trace],
   )
   const telemetry = useMemo(() => summarizeTrace(visibleTrace), [visibleTrace])
-  const recentEvents = useMemo(() => visibleTrace.slice(-6).reverse(), [visibleTrace])
-  const visiblePegs = useMemo(
-    () => (activeStageKey === 'stage3' ? simulateHanoi(visibleTrace) : null),
-    [activeStageKey, visibleTrace],
-  )
   const runDelay =
     activeStageKey === 'stage3' ? Math.max(420, 1300 / speed) : Math.max(260, 760 / speed)
   const isRunStale = activeExecution.codeSnapshot !== activeCode
@@ -505,57 +485,12 @@ function App() {
             <StageVisualization execution={activeExecution} speed={speed} stageKey={activeStageKey} />
           </div>
 
-          <div className="telemetry-strip">
-            <div className="telemetry-card">
-              <span>호출 수</span>
-              <strong>{telemetry.calls}</strong>
-            </div>
-            <div className="telemetry-card">
-              <span>반환 수</span>
-              <strong>{telemetry.returns}</strong>
-            </div>
-            <div className="telemetry-card">
-              <span>현재 결과</span>
-              <strong>
-                {activeStageKey === 'stage3'
-                  ? `${visiblePegs?.C.length ?? 0}/3 도착`
-                  : activeExecution.result ?? '대기 중'}
-              </strong>
-            </div>
-            <div className="telemetry-card">
-              <span>세계 상태</span>
-              <strong>{completion[activeStageKey] ? '클리어' : '진행 중'}</strong>
-            </div>
+          <div className="preview-status">
+            <span>호출 {telemetry.calls}</span>
+            <span>반환 {telemetry.returns}</span>
+            <span>결과 {activeExecution.result ?? '대기 중'}</span>
+            <span>{completion[activeStageKey] ? '클리어' : '진행 중'}</span>
           </div>
-
-          <section className="event-feed-panel">
-            <div className="event-feed-header">
-              <h3>실시간 로그</h3>
-              <span>{recentEvents.length ? '최신 6개 이벤트' : '대기 중'}</span>
-            </div>
-
-            <div className="event-feed-list">
-              {recentEvents.length ? (
-                recentEvents.map((event, index) => (
-                  <article className={`feed-entry ${event.type}`} key={`${event.type}-${index}`}>
-                    <strong>
-                      {event.type === 'call'
-                        ? 'CALL'
-                        : event.type === 'return'
-                          ? 'RETURN'
-                          : 'MOVE'}
-                    </strong>
-                    <p>{formatEventLabel(event)}</p>
-                  </article>
-                ))
-              ) : (
-                <article className="feed-entry empty">
-                  <strong>WAIT</strong>
-                  <p>아직 재생된 이벤트가 없습니다. 코드를 실행하면 로그가 순서대로 쌓입니다.</p>
-                </article>
-              )}
-            </div>
-          </section>
         </section>
       </main>
     </div>
