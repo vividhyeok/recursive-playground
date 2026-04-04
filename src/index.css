@@ -1,14 +1,13 @@
 :root {
   font-family:
-    'Segoe UI Variable',
+    'Segoe UI',
     'Malgun Gothic',
-    'Apple SD Gothic Neo',
     'Noto Sans KR',
     sans-serif;
   line-height: 1.5;
-  font-weight: 500;
-  color: #edf6ff;
-  background: #050814;
+  font-weight: 400;
+  color: #1f2937;
+  background: #f3f4f6;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -28,10 +27,7 @@ body,
 body {
   margin: 0;
   min-width: 320px;
-  background:
-    radial-gradient(circle at top, rgba(35, 69, 135, 0.45), transparent 28%),
-    radial-gradient(circle at 80% 10%, rgba(28, 120, 140, 0.22), transparent 22%),
-    linear-gradient(180deg, #050814 0%, #04070f 100%);
+  background: #f3f4f6;
 }
 
 button,
@@ -45,5 +41,5 @@ a {
 }
 
 ::selection {
-  background: rgba(95, 177, 255, 0.28);
+  background: rgba(37, 99, 235, 0.18);
 }

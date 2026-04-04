@@ -1,3 +1,214 @@
+.app-shell {
+  width: min(1500px, calc(100vw - 24px));
+  margin: 12px auto;
+  padding: 8px;
+  color: #1f2937;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 10px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.app-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.stage-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.stage-chip {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stage-chip strong {
+  font-size: 0.78rem;
+}
+
+.stage-chip span {
+  font-size: 0.9rem;
+}
+
+.stage-chip.active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.14);
+}
+
+.stage-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.stage-summary {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.stage-summary strong {
+  font-size: 0.92rem;
+}
+
+.stage-summary span {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.stage-summary em {
+  margin-left: auto;
+  color: #2563eb;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.86rem;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(420px, 0.95fr) minmax(560px, 1.05fr);
+  gap: 10px;
+}
+
+.editor-pane,
+.preview-pane {
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px;
+  min-height: 720px;
+  display: flex;
+  flex-direction: column;
+}
+
+.pane-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.pane-head h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.app-shell .mode-toggle {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+}
+
+.app-shell .mode-toggle button {
+  color: #374151;
+}
+
+.app-shell .mode-toggle .selected {
+  background: #2563eb;
+  color: #fff;
+}
+
+.app-shell .editor-frame,
+.app-shell .visual-frame {
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+
+.app-shell .control-deck {
+  margin-top: 10px;
+}
+
+.app-shell .primary {
+  background: #2563eb;
+  color: #fff;
+  box-shadow: none;
+}
+
+.app-shell .secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.app-shell .speed-control {
+  margin-left: auto;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+}
+
+.app-shell .status-card,
+.app-shell .telemetry-card,
+.app-shell .event-feed-panel,
+.app-shell .feed-entry {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  box-shadow: none;
+}
+
+.app-shell .telemetry-strip {
+  margin-top: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.shortcut-hint {
+  margin-top: 8px;
+  font-size: 0.84rem;
+  color: #6b7280;
+}
+
+.app-shell .arena-readouts {
+  display: flex;
+  gap: 6px;
+}
+
+.app-shell .arena-readouts span {
+  border: 1px solid #d1d5db;
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+@media (max-width: 1120px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-pane,
+  .preview-pane {
+    min-height: 620px;
+  }
+
+  .stage-summary {
+    flex-wrap: wrap;
+  }
+}
+
 .shell {
   --stage-primary: #68d8ff;
   --stage-secondary: #ffbf6a;

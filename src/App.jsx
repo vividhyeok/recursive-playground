@@ -118,8 +118,6 @@ function App() {
   const [isRunning, setIsRunning] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
   const [pythonWarning, setPythonWarning] = useState('')
-  const [hasBooted, setHasBooted] = useState(false)
-  const [showBriefing, setShowBriefing] = useState(false)
   const executeStageRef = useRef(null)
   const handleStepRef = useRef(null)
 
@@ -213,16 +211,6 @@ function App() {
 
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (!hasBooted && event.key === 'Enter') {
-        event.preventDefault()
-        setHasBooted(true)
-        return
-      }
-
-      if (!hasBooted) {
-        return
-      }
-
       const target = event.target
       const tagName = target instanceof HTMLElement ? target.tagName : ''
       const isTypingTarget =
@@ -251,15 +239,11 @@ function App() {
       if (event.key === '2') {
         setEditorMode('python')
       }
-
-      if (event.key.toLowerCase() === 'b') {
-        setShowBriefing((current) => !current)
-      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [hasBooted, isRunning])
+  }, [isRunning])
 
   const unlockedStages = useMemo(
     () =>
@@ -388,72 +372,20 @@ function App() {
   const progressLabel = completion.stage3 ? '모든 구역 정복 완료' : `${progressCount}/3 구역 정복`
 
   return (
-    <div className={`shell stage-${activeStageKey} ${hasBooted ? 'booted' : 'boot-waiting'}`}>
-      {!hasBooted ? (
-        <section className="boot-overlay" aria-label="게임 시작 화면">
-          <p className="eyebrow">RECURSIVE TRAINING SIM</p>
-          <h2>Recursive Playground</h2>
-          <p>코드로 월드를 움직이는 훈련을 시작하세요.</p>
-          <button onClick={() => setHasBooted(true)} type="button">
-            PRESS START
-          </button>
-          <small>Enter 키로도 시작할 수 있습니다.</small>
-        </section>
-      ) : null}
-
-      <div className="shell-backdrop">
-        <span className="backdrop-orb orb-a" />
-        <span className="backdrop-orb orb-b" />
-        <span className="backdrop-orb orb-c" />
-        <span className="scan-lines" />
-      </div>
-
-      <header className="command-bar">
-        <div className="brand-panel">
-          <p className="eyebrow">재귀 훈련 아레나</p>
-          <h1>Recursive Playground</h1>
-          <p className="lede">
-            웹페이지가 아니라, 코드-아레나 플레이 화면입니다.
-          </p>
-        </div>
-
-        <div className="status-hud">
-          <div className="hud-unit">
-            <span>현재 구역</span>
-            <strong>{activeStage.worldName}</strong>
-          </div>
-          <div className="hud-unit">
-            <span>미션 상태</span>
-            <strong>{progressLabel}</strong>
-          </div>
-          <div className="hud-unit">
-            <span>입력 방식</span>
-            <strong>{editorMode === 'blocks' ? '블록 코딩' : '파이썬 코드'}</strong>
-          </div>
-          <div className="hud-unit">
-            <span>난이도</span>
-            <strong>{activeStage.difficulty}</strong>
-          </div>
-          <button
-            className="briefing-toggle"
-            onClick={() => setShowBriefing((current) => !current)}
-            type="button"
-          >
-            {showBriefing ? '브리핑 닫기 (B)' : '브리핑 열기 (B)'}
-          </button>
-        </div>
+    <div className="app-shell">
+      <header className="app-header">
+        <h1>Recursive Playground</h1>
+        <p>Blockly 스타일 편집기 + 실행 결과 시각화</p>
       </header>
 
-      {showBriefing ? (
-        <section className="mission-rack">
-        <nav className="stage-tabs" aria-label="단계 선택">
+      <nav className="stage-row" aria-label="단계 선택">
           {STAGE_ORDER.map((stageKey) => {
             const stage = STAGES[stageKey]
             const unlocked = unlockedStages[stageKey]
             const active = stageKey === activeStageKey
             return (
               <button
-                className={`stage-tab ${active ? 'active' : ''}`}
+                className={`stage-chip ${active ? 'active' : ''}`}
                 disabled={!unlocked}
                 key={stageKey}
                 onClick={() => {
@@ -463,61 +395,24 @@ function App() {
                 }}
                 type="button"
               >
-                <span className="stage-index">STAGE {stage.number}</span>
-                <strong>{stage.shortLabel}</strong>
-                <em>{stage.worldName}</em>
-                <small>
-                  {completion[stageKey] ? '완료' : unlocked ? '해금됨' : '잠김'}
-                </small>
+                <strong>Stage {stage.number}</strong>
+                <span>{stage.shortLabel}</span>
               </button>
             )
           })}
-        </nav>
+      </nav>
 
-        <section className="mission-panel">
-          <div className="mission-panel-top">
-            <div>
-              <p className="eyebrow">현재 미션</p>
-              <h2>{activeStage.missionName}</h2>
-              <p>{activeStage.subtitle}</p>
-            </div>
-            <div className="difficulty-pill">{activeStage.difficulty}</div>
-          </div>
-
-          <div className="mission-grid">
-            <article className="mission-card">
-              <span className="brief-tag">핵심 개념</span>
-              <p>{activeStage.concept}</p>
-            </article>
-            <article className="mission-card">
-              <span className="brief-tag">목표</span>
-              <p>{activeStage.objective}</p>
-            </article>
-            <article className="mission-card">
-              <span className="brief-tag">입력 힌트</span>
-              <p>{activeStage.modeHint}</p>
-            </article>
-          </div>
-        </section>
+      <section className="stage-summary">
+        <strong>{activeStage.missionName}</strong>
+        <span>{activeStage.subtitle}</span>
+        <em>{progressLabel}</em>
       </section>
-      ) : null}
 
-      <main className="game-board">
-        <section className="panel console-panel">
-          <div className="panel-head">
-            <div>
-              <p className="panel-kicker">코드 콘솔</p>
-              <h2>{activeStage.title}</h2>
-              <p>
-                {editorMode === 'blocks'
-                  ? '블록을 조립해 월드 규칙을 만드세요.'
-                  : '파이썬을 직접 수정해 월드 규칙을 만드세요.'}
-              </p>
-            </div>
-
-            <div className="mode-cluster">
-              <span className="mode-label">입력 방식 선택</span>
-              <div className="mode-toggle" role="tablist" aria-label="코드 입력 방식">
+      <main className="workspace">
+        <section className="editor-pane">
+          <div className="pane-head">
+            <h2>{activeStage.title}</h2>
+            <div className="mode-toggle" role="tablist" aria-label="코드 입력 방식">
                 <button
                   className={editorMode === 'blocks' ? 'selected' : ''}
                   onClick={() => setEditorMode('blocks')}
@@ -532,7 +427,6 @@ function App() {
                 >
                   파이썬 코드
                 </button>
-              </div>
             </div>
           </div>
 
@@ -567,7 +461,6 @@ function App() {
             <button className="secondary" disabled={isRunning} onClick={handleStep} type="button">
               한 단계
             </button>
-            <div className="shortcut-hint">Enter 실행 | Space 한 단계 | 1/2 모드 전환</div>
             <label className="speed-control">
               <span>재생 속도</span>
               <input
@@ -582,6 +475,8 @@ function App() {
             </label>
           </div>
 
+          <div className="shortcut-hint">단축키: Enter 실행, Space 한 단계, 1/2 모드 전환</div>
+
           <div className={`status-card ${activeExecution.error ? 'error' : ''}`}>
             <strong>상태</strong>
             <p>{statusMessage || activeStage.readyMessage}</p>
@@ -594,29 +489,15 @@ function App() {
           </div>
         </section>
 
-        <section className="panel arena-panel">
-          <div className="panel-head arena-head">
-            <div>
-              <p className="panel-kicker">플레이 아레나</p>
-              <h2>{activeStage.arenaName}</h2>
-              <p>재귀 호출의 시간순 흔적이 게임 월드 안에서 재생됩니다.</p>
-            </div>
-
+        <section className="preview-pane">
+          <div className="pane-head">
+            <h2>{activeStage.arenaName}</h2>
             <div className="arena-readouts">
-              <div className="hud-unit small">
-                <span>재생 이벤트</span>
-                <strong>
-                  {activeExecution.playhead}/{activeExecution.trace.length}
-                </strong>
-              </div>
-              <div className="hud-unit small">
-                <span>최대 깊이</span>
-                <strong>{telemetry.maxDepth}</strong>
-              </div>
-              <div className="hud-unit small">
-                <span>이동 수</span>
-                <strong>{telemetry.moves}</strong>
-              </div>
+              <span>
+                {activeExecution.playhead}/{activeExecution.trace.length}
+              </span>
+              <span>깊이 {telemetry.maxDepth}</span>
+              <span>이동 {telemetry.moves}</span>
             </div>
           </div>
 
