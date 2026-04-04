@@ -1,9 +1,29 @@
+function buildBlockNode(descriptor) {
+  if (typeof descriptor === 'string') {
+    return { type: descriptor }
+  }
+
+  const node = {
+    type: descriptor.type,
+  }
+
+  if (descriptor.body?.length) {
+    node.inputs = {
+      BODY: {
+        block: buildChain(descriptor.body),
+      },
+    }
+  }
+
+  return node
+}
+
 function buildChain(types) {
   let block = null
 
   for (let index = types.length - 1; index >= 0; index -= 1) {
     block = {
-      type: types[index],
+      ...buildBlockNode(types[index]),
       ...(block ? { next: { block } } : {}),
     }
   }
@@ -86,7 +106,10 @@ function parseFactorial(code) {
       nextLine?.indent === 2 &&
       /^return\s+1$/.test(nextLine.text)
     ) {
-      types.push('rp_factorial_base_case')
+      types.push({
+        type: 'rp_factorial_if_base',
+        body: ['rp_factorial_return_one'],
+      })
       index += 1
       continue
     }
@@ -95,7 +118,7 @@ function parseFactorial(code) {
       line.indent === 1 &&
       /^return\s+n\s*\*\s*factorial\s*\(\s*n\s*-\s*1\s*\)$/.test(line.text)
     ) {
-      types.push('rp_factorial_recursive_return')
+      types.push('rp_factorial_return_recursive')
     }
   }
 
@@ -120,7 +143,10 @@ function parseFibonacci(code) {
       nextLine?.indent === 2 &&
       /^return\s+n$/.test(nextLine.text)
     ) {
-      types.push('rp_fibonacci_base_case')
+      types.push({
+        type: 'rp_fibonacci_if_base',
+        body: ['rp_fibonacci_return_n'],
+      })
       index += 1
       continue
     }
@@ -131,7 +157,7 @@ function parseFibonacci(code) {
         line.text,
       )
     ) {
-      types.push('rp_fibonacci_recursive_return')
+      types.push('rp_fibonacci_return_recursive')
     }
   }
 
@@ -221,8 +247,9 @@ export const STAGES = {
     toolbox: {
       kind: 'flyoutToolbox',
       contents: [
-        { kind: 'block', type: 'rp_factorial_base_case' },
-        { kind: 'block', type: 'rp_factorial_recursive_return' },
+        { kind: 'block', type: 'rp_factorial_if_base' },
+        { kind: 'block', type: 'rp_factorial_return_one' },
+        { kind: 'block', type: 'rp_factorial_return_recursive' },
       ],
     },
     defaultWorkspace: () => buildWorkspace('rp_factorial_function'),
@@ -253,8 +280,9 @@ export const STAGES = {
     toolbox: {
       kind: 'flyoutToolbox',
       contents: [
-        { kind: 'block', type: 'rp_fibonacci_base_case' },
-        { kind: 'block', type: 'rp_fibonacci_recursive_return' },
+        { kind: 'block', type: 'rp_fibonacci_if_base' },
+        { kind: 'block', type: 'rp_fibonacci_return_n' },
+        { kind: 'block', type: 'rp_fibonacci_return_recursive' },
       ],
     },
     defaultWorkspace: () => buildWorkspace('rp_fibonacci_function'),

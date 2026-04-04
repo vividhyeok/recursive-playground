@@ -37,6 +37,10 @@ function BlocklyEditor({ stage, workspaceData, onWorkspaceChange }) {
       applyingExternalStateRef.current = true
       workspace.clear()
       Blockly.serialization.workspaces.load(data, workspace)
+      const rootFunctionBlock = workspace.getBlocksByType(stage.functionBlockType, false)[0]
+      if (rootFunctionBlock && typeof workspace.centerOnBlock === 'function') {
+        workspace.centerOnBlock(rootFunctionBlock.id)
+      }
       Blockly.svgResize(workspace)
       serializedWorkspaceRef.current = JSON.stringify(
         Blockly.serialization.workspaces.save(workspace),
@@ -99,12 +103,16 @@ function BlocklyEditor({ stage, workspaceData, onWorkspaceChange }) {
     applyingExternalStateRef.current = true
     workspace.clear()
     Blockly.serialization.workspaces.load(workspaceData, workspace)
+    const rootFunctionBlock = workspace.getBlocksByType(stage.functionBlockType, false)[0]
+    if (rootFunctionBlock && typeof workspace.centerOnBlock === 'function') {
+      workspace.centerOnBlock(rootFunctionBlock.id)
+    }
     Blockly.svgResize(workspace)
     serializedWorkspaceRef.current = JSON.stringify(
       Blockly.serialization.workspaces.save(workspace),
     )
     applyingExternalStateRef.current = false
-  }, [workspaceData])
+  }, [workspaceData, stage.functionBlockType])
 
   return <div className="blockly-host" ref={hostRef} />
 }

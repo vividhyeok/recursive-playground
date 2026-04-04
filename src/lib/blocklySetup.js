@@ -31,6 +31,19 @@ function buildStatementBlock(type, label, color) {
   }
 }
 
+function buildIfBlock(type, label, color) {
+  Blockly.Blocks[type] = {
+    init() {
+      this.appendDummyInput().appendField(label)
+      this.appendStatementInput('BODY').setCheck('rpStatement')
+      this.setPreviousStatement(true, 'rpStatement')
+      this.setNextStatement(true, 'rpStatement')
+      this.setColour(color)
+      this.setTooltip(label)
+    },
+  }
+}
+
 function registerBlocks() {
   buildFunctionBlock('rp_factorial_function', 'factorial(n)', 204)
   buildFunctionBlock('rp_fibonacci_function', 'fib(n)', 164)
@@ -40,18 +53,19 @@ function registerBlocks() {
     22,
   )
 
+  buildIfBlock('rp_factorial_if_base', 'if n == 1', 270)
+  buildStatementBlock('rp_factorial_return_one', 'return 1', 250)
+  buildStatementBlock('rp_factorial_return_recursive', 'return n * factorial(n - 1)', 232)
+
+  buildIfBlock('rp_fibonacci_if_base', 'if n <= 1', 180)
+  buildStatementBlock('rp_fibonacci_return_n', 'return n', 150)
+  buildStatementBlock('rp_fibonacci_return_recursive', 'return fib(n - 1) + fib(n - 2)', 116)
+
+  // 레거시 저장 상태 호환용 블록
   buildStatementBlock('rp_factorial_base_case', '기저 조건: n == 1 이면 1 반환', 262)
-  buildStatementBlock(
-    'rp_factorial_recursive_return',
-    '재귀 호출: n * factorial(n - 1) 반환',
-    236,
-  )
+  buildStatementBlock('rp_factorial_recursive_return', '재귀 호출: n * factorial(n - 1) 반환', 236)
   buildStatementBlock('rp_fibonacci_base_case', '기저 조건: n <= 1 이면 n 반환', 122)
-  buildStatementBlock(
-    'rp_fibonacci_recursive_return',
-    '재귀 분기: fib(n - 1) + fib(n - 2) 반환',
-    96,
-  )
+  buildStatementBlock('rp_fibonacci_recursive_return', '재귀 분기: fib(n - 1) + fib(n - 2) 반환', 96)
   buildStatementBlock(
     'rp_hanoi_base_case',
     '기저 조건: move_disk(from_peg, to_peg) 후 return',
@@ -93,17 +107,38 @@ function registerBlocks() {
     return `def hanoi(n, from_peg, to_peg, aux_peg):\n${body}`
   }
 
+  pythonGenerator.forBlock.rp_factorial_if_base = function factorialIfBase(block, generator) {
+    const body = generator.statementToCode(block, 'BODY') || '    pass\n'
+    return `if n == 1:\n${body}`
+  }
+
+  pythonGenerator.forBlock.rp_factorial_return_one = () => 'return 1\n'
+
+  pythonGenerator.forBlock.rp_factorial_return_recursive = () =>
+    'return n * factorial(n - 1)\n'
+
+  pythonGenerator.forBlock.rp_fibonacci_if_base = function fibonacciIfBase(block, generator) {
+    const body = generator.statementToCode(block, 'BODY') || '    pass\n'
+    return `if n <= 1:\n${body}`
+  }
+
+  pythonGenerator.forBlock.rp_fibonacci_return_n = () => 'return n\n'
+
+  pythonGenerator.forBlock.rp_fibonacci_return_recursive = () =>
+    'return fib(n - 1) + fib(n - 2)\n'
+
+  // 레거시 저장 상태 호환용 생성기
   pythonGenerator.forBlock.rp_factorial_base_case = () =>
-    '    if n == 1:\n        return 1\n'
+    'if n == 1:\n    return 1\n'
 
   pythonGenerator.forBlock.rp_factorial_recursive_return = () =>
-    '    return n * factorial(n - 1)\n'
+    'return n * factorial(n - 1)\n'
 
   pythonGenerator.forBlock.rp_fibonacci_base_case = () =>
-    '    if n <= 1:\n        return n\n'
+    'if n <= 1:\n    return n\n'
 
   pythonGenerator.forBlock.rp_fibonacci_recursive_return = () =>
-    '    return fib(n - 1) + fib(n - 2)\n'
+    'return fib(n - 1) + fib(n - 2)\n'
 
   pythonGenerator.forBlock.rp_hanoi_base_case = () =>
     '    if n == 1:\n        move_disk(from_peg, to_peg)\n        return\n'
