@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import BlocklyEditor from './components/BlocklyEditor.jsx'
 import FactorialVisualizer from './components/FactorialVisualizer.jsx'
@@ -118,6 +118,10 @@ function App() {
   const [isRunning, setIsRunning] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
   const [pythonWarning, setPythonWarning] = useState('')
+  const [hasBooted, setHasBooted] = useState(false)
+  const [showBriefing, setShowBriefing] = useState(false)
+  const executeStageRef = useRef(null)
+  const handleStepRef = useRef(null)
 
   const activeStage = STAGES[activeStageKey]
   const activeExecution = executions[activeStageKey]
@@ -201,6 +205,61 @@ function App() {
     setStatusMessage(activeStage.readyMessage)
     setPythonWarning('')
   }, [activeStage, activeStageKey])
+
+  useEffect(() => {
+    executeStageRef.current = executeStage
+    handleStepRef.current = handleStep
+  })
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (!hasBooted && event.key === 'Enter') {
+        event.preventDefault()
+        setHasBooted(true)
+        return
+      }
+
+      if (!hasBooted) {
+        return
+      }
+
+      const target = event.target
+      const tagName = target instanceof HTMLElement ? target.tagName : ''
+      const isTypingTarget =
+        tagName === 'INPUT' ||
+        tagName === 'TEXTAREA' ||
+        (target instanceof HTMLElement && target.isContentEditable)
+
+      if (isTypingTarget) {
+        return
+      }
+
+      if (event.key === 'Enter' && !isRunning) {
+        event.preventDefault()
+        executeStageRef.current?.({ autoPlay: true })
+      }
+
+      if (event.key === ' ' && !isRunning) {
+        event.preventDefault()
+        handleStepRef.current?.()
+      }
+
+      if (event.key === '1') {
+        setEditorMode('blocks')
+      }
+
+      if (event.key === '2') {
+        setEditorMode('python')
+      }
+
+      if (event.key.toLowerCase() === 'b') {
+        setShowBriefing((current) => !current)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [hasBooted, isRunning])
 
   const unlockedStages = useMemo(
     () =>
@@ -329,7 +388,19 @@ function App() {
   const progressLabel = completion.stage3 ? '모든 구역 정복 완료' : `${progressCount}/3 구역 정복`
 
   return (
-    <div className={`shell stage-${activeStageKey}`}>
+    <div className={`shell stage-${activeStageKey} ${hasBooted ? 'booted' : 'boot-waiting'}`}>
+      {!hasBooted ? (
+        <section className="boot-overlay" aria-label="게임 시작 화면">
+          <p className="eyebrow">RECURSIVE TRAINING SIM</p>
+          <h2>Recursive Playground</h2>
+          <p>코드로 월드를 움직이는 훈련을 시작하세요.</p>
+          <button onClick={() => setHasBooted(true)} type="button">
+            PRESS START
+          </button>
+          <small>Enter 키로도 시작할 수 있습니다.</small>
+        </section>
+      ) : null}
+
       <div className="shell-backdrop">
         <span className="backdrop-orb orb-a" />
         <span className="backdrop-orb orb-b" />
@@ -342,8 +413,7 @@ function App() {
           <p className="eyebrow">재귀 훈련 아레나</p>
           <h1>Recursive Playground</h1>
           <p className="lede">
-            설명을 읽는 대신, 코드가 월드를 움직이게 만드세요. 호출, 반환, 분해가 모두 눈앞에서
-            플레이됩니다.
+            웹페이지가 아니라, 코드-아레나 플레이 화면입니다.
           </p>
         </div>
 
@@ -364,10 +434,18 @@ function App() {
             <span>난이도</span>
             <strong>{activeStage.difficulty}</strong>
           </div>
+          <button
+            className="briefing-toggle"
+            onClick={() => setShowBriefing((current) => !current)}
+            type="button"
+          >
+            {showBriefing ? '브리핑 닫기 (B)' : '브리핑 열기 (B)'}
+          </button>
         </div>
       </header>
 
-      <section className="mission-rack">
+      {showBriefing ? (
+        <section className="mission-rack">
         <nav className="stage-tabs" aria-label="단계 선택">
           {STAGE_ORDER.map((stageKey) => {
             const stage = STAGES[stageKey]
@@ -422,6 +500,7 @@ function App() {
           </div>
         </section>
       </section>
+      ) : null}
 
       <main className="game-board">
         <section className="panel console-panel">
@@ -488,6 +567,7 @@ function App() {
             <button className="secondary" disabled={isRunning} onClick={handleStep} type="button">
               한 단계
             </button>
+            <div className="shortcut-hint">Enter 실행 | Space 한 단계 | 1/2 모드 전환</div>
             <label className="speed-control">
               <span>재생 속도</span>
               <input
