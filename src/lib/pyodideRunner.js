@@ -101,7 +101,7 @@ try:
     sys.settrace(tracer)
     result = eval(entry_expression, namespace, namespace)
 except RecursionError:
-    error = "Looks like there's no base case - the stack overflowed!"
+    error = "기저 조건이 없어 보입니다. 재귀가 너무 깊어져 스택이 넘쳤습니다."
 except Exception as exc:
     error = f"{type(exc).__name__}: {exc}"
 finally:

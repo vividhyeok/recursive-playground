@@ -8,13 +8,13 @@ function buildFunctionBlock(type, signature, color) {
   Blockly.Blocks[type] = {
     init() {
       this.appendDummyInput()
-        .appendField('define')
+        .appendField('함수')
         .appendField(signature)
       this.appendStatementInput('BODY').setCheck('rpStatement')
       this.setColour(color)
       this.setDeletable(false)
       this.setMovable(false)
-      this.setTooltip(`Scaffold for ${signature}`)
+      this.setTooltip(`${signature} 함수 뼈대`)
     },
   }
 }
@@ -40,32 +40,32 @@ function registerBlocks() {
     22,
   )
 
-  buildStatementBlock('rp_factorial_base_case', 'base case: if n == 1 return 1', 262)
+  buildStatementBlock('rp_factorial_base_case', '기저 조건: n == 1 이면 1 반환', 262)
   buildStatementBlock(
     'rp_factorial_recursive_return',
-    'recursive call: return n * factorial(n - 1)',
+    '재귀 호출: n * factorial(n - 1) 반환',
     236,
   )
-  buildStatementBlock('rp_fibonacci_base_case', 'base case: if n <= 1 return n', 122)
+  buildStatementBlock('rp_fibonacci_base_case', '기저 조건: n <= 1 이면 n 반환', 122)
   buildStatementBlock(
     'rp_fibonacci_recursive_return',
-    'recursive split: return fib(n - 1) + fib(n - 2)',
+    '재귀 분기: fib(n - 1) + fib(n - 2) 반환',
     96,
   )
   buildStatementBlock(
     'rp_hanoi_base_case',
-    'base case: move_disk(from_peg, to_peg) and return',
+    '기저 조건: move_disk(from_peg, to_peg) 후 return',
     36,
   )
   buildStatementBlock(
     'rp_hanoi_recursive_left',
-    'recursive call: hanoi(n - 1, from_peg, aux_peg, to_peg)',
+    '재귀 호출 1: hanoi(n - 1, from_peg, aux_peg, to_peg)',
     16,
   )
-  buildStatementBlock('rp_hanoi_move_disk', 'move disk: move_disk(from_peg, to_peg)', 56)
+  buildStatementBlock('rp_hanoi_move_disk', '원반 이동: move_disk(from_peg, to_peg)', 56)
   buildStatementBlock(
     'rp_hanoi_recursive_right',
-    'recursive call: hanoi(n - 1, aux_peg, to_peg, from_peg)',
+    '재귀 호출 2: hanoi(n - 1, aux_peg, to_peg, from_peg)',
     4,
   )
 

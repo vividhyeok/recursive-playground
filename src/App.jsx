@@ -46,6 +46,44 @@ function buildExecutionState() {
   return Object.fromEntries(STAGE_ORDER.map((stageKey) => [stageKey, createEmptyExecution()]))
 }
 
+function summarizeTrace(events) {
+  return events.reduce(
+    (summary, event) => {
+      if (event.type === 'call') {
+        summary.calls += 1
+        summary.maxDepth = Math.max(summary.maxDepth, Number(event.depth) || 0)
+      } else if (event.type === 'return') {
+        summary.returns += 1
+      } else if (event.type === 'move') {
+        summary.moves += 1
+      }
+
+      return summary
+    },
+    {
+      calls: 0,
+      returns: 0,
+      moves: 0,
+      maxDepth: 0,
+    },
+  )
+}
+
+function formatEventLabel(event) {
+  if (event.type === 'call') {
+    const args = Object.entries(event.args ?? {})
+      .map(([key, value]) => `${key}=${value}`)
+      .join(', ')
+    return `${event.func}(${args}) 진입`
+  }
+
+  if (event.type === 'return') {
+    return `${event.func} 반환값 ${event.value}`
+  }
+
+  return `원반 이동 ${event.from} → ${event.to}`
+}
+
 function StageVisualization({ stageKey, execution, speed }) {
   const visibleTrace = execution.trace.slice(0, execution.playhead)
 
@@ -84,6 +122,16 @@ function App() {
   const activeStage = STAGES[activeStageKey]
   const activeExecution = executions[activeStageKey]
   const activeCode = codes[activeStageKey]
+  const visibleTrace = useMemo(
+    () => activeExecution.trace.slice(0, activeExecution.playhead),
+    [activeExecution.playhead, activeExecution.trace],
+  )
+  const telemetry = useMemo(() => summarizeTrace(visibleTrace), [visibleTrace])
+  const recentEvents = useMemo(() => visibleTrace.slice(-6).reverse(), [visibleTrace])
+  const visiblePegs = useMemo(
+    () => (activeStageKey === 'stage3' ? simulateHanoi(visibleTrace) : null),
+    [activeStageKey, visibleTrace],
+  )
   const runDelay =
     activeStageKey === 'stage3' ? Math.max(420, 1300 / speed) : Math.max(260, 760 / speed)
   const isRunStale = activeExecution.codeSnapshot !== activeCode
@@ -150,9 +198,9 @@ function App() {
         isPlaying: false,
       },
     }))
-    setStatusMessage('')
+    setStatusMessage(activeStage.readyMessage)
     setPythonWarning('')
-  }, [activeStageKey])
+  }, [activeStage, activeStageKey])
 
   const unlockedStages = useMemo(
     () =>
@@ -165,7 +213,7 @@ function App() {
   async function executeStage({ autoPlay }) {
     const stage = STAGES[activeStageKey]
     setIsRunning(true)
-    setStatusMessage('Loading Pyodide and tracing the recursive execution...')
+    setStatusMessage('파이썬 엔진을 깨우고 재귀 흔적을 추적하는 중입니다...')
 
     try {
       const payload = await runStudentCode(stage, activeCode)
@@ -203,13 +251,13 @@ function App() {
         }))
         setStatusMessage(stage.successMessage)
       } else if (stage.key === 'stage3') {
-        setStatusMessage('The trace ran, but the disks did not finish on peg C yet.')
+        setStatusMessage('의식은 재생됐지만 아직 모든 원반이 C 기둥에 모이지 않았습니다.')
       } else {
-        setStatusMessage('The trace ran, but the final answer is not correct yet.')
+        setStatusMessage('흐름은 재생됐지만 목표 결과가 아직 맞지 않습니다.')
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Pyodide failed to load or run the code.'
+        error instanceof Error ? error.message : '파이썬 엔진을 불러오거나 코드를 실행하지 못했습니다.'
       setStatusMessage(message)
       setExecutions((current) => ({
         ...current,
@@ -254,7 +302,7 @@ function App() {
     }
 
     setPythonWarning(
-      'Python updated, but Blockly could not rebuild this version of the function. The text still runs.',
+      '파이썬 코드는 업데이트됐지만 Blockly 모양으로는 완전히 되돌리지 못했습니다. 텍스트 실행은 계속 가능합니다.',
     )
   }
 
@@ -278,87 +326,134 @@ function App() {
   }
 
   const progressCount = Object.values(completion).filter(Boolean).length
+  const progressLabel = completion.stage3 ? '모든 구역 정복 완료' : `${progressCount}/3 구역 정복`
 
   return (
-    <div className="shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">Interactive recursion studio</p>
+    <div className={`shell stage-${activeStageKey}`}>
+      <div className="shell-backdrop">
+        <span className="backdrop-orb orb-a" />
+        <span className="backdrop-orb orb-b" />
+        <span className="backdrop-orb orb-c" />
+        <span className="scan-lines" />
+      </div>
+
+      <header className="command-bar">
+        <div className="brand-panel">
+          <p className="eyebrow">재귀 훈련 아레나</p>
           <h1>Recursive Playground</h1>
           <p className="lede">
-            Write the recursive rule, then watch the structure unfold in the world itself.
+            설명을 읽는 대신, 코드가 월드를 움직이게 만드세요. 호출, 반환, 분해가 모두 눈앞에서
+            플레이됩니다.
           </p>
         </div>
-        <div className="progress-card">
-          <span>{progressCount} / 3 complete</span>
-          <strong>{completion.stage3 ? 'All stages cleared' : 'Progress is saved locally'}</strong>
+
+        <div className="status-hud">
+          <div className="hud-unit">
+            <span>현재 구역</span>
+            <strong>{activeStage.worldName}</strong>
+          </div>
+          <div className="hud-unit">
+            <span>미션 상태</span>
+            <strong>{progressLabel}</strong>
+          </div>
+          <div className="hud-unit">
+            <span>입력 방식</span>
+            <strong>{editorMode === 'blocks' ? '블록 코딩' : '파이썬 코드'}</strong>
+          </div>
+          <div className="hud-unit">
+            <span>난이도</span>
+            <strong>{activeStage.difficulty}</strong>
+          </div>
         </div>
       </header>
 
-      <nav className="stage-tabs" aria-label="Stage selection">
-        {STAGE_ORDER.map((stageKey) => {
-          const stage = STAGES[stageKey]
-          const unlocked = unlockedStages[stageKey]
-          const active = stageKey === activeStageKey
-          return (
-            <button
-              className={`stage-tab ${active ? 'active' : ''}`}
-              disabled={!unlocked}
-              key={stageKey}
-              onClick={() => {
-                if (unlocked) {
-                  setActiveStageKey(stageKey)
-                }
-              }}
-              type="button"
-            >
-              <span>{stage.title}</span>
-              <small>
-                {completion[stageKey] ? 'Completed' : unlocked ? 'Unlocked' : 'Locked'}
-              </small>
-            </button>
-          )
-        })}
-      </nav>
+      <section className="mission-rack">
+        <nav className="stage-tabs" aria-label="단계 선택">
+          {STAGE_ORDER.map((stageKey) => {
+            const stage = STAGES[stageKey]
+            const unlocked = unlockedStages[stageKey]
+            const active = stageKey === activeStageKey
+            return (
+              <button
+                className={`stage-tab ${active ? 'active' : ''}`}
+                disabled={!unlocked}
+                key={stageKey}
+                onClick={() => {
+                  if (unlocked) {
+                    setActiveStageKey(stageKey)
+                  }
+                }}
+                type="button"
+              >
+                <span className="stage-index">STAGE {stage.number}</span>
+                <strong>{stage.shortLabel}</strong>
+                <em>{stage.worldName}</em>
+                <small>
+                  {completion[stageKey] ? '완료' : unlocked ? '해금됨' : '잠김'}
+                </small>
+              </button>
+            )
+          })}
+        </nav>
 
-      <section className="stage-brief">
-        <div className="brief-card">
-          <span className="brief-tag">Concept</span>
-          <p>{activeStage.concept}</p>
-        </div>
-        <div className="brief-card">
-          <span className="brief-tag">Objective</span>
-          <p>{activeStage.objective}</p>
-        </div>
-        <div className="brief-card">
-          <span className="brief-tag">Editor Hint</span>
-          <p>{activeStage.modeHint}</p>
-        </div>
-      </section>
-
-      <main className="workspace">
-        <section className="panel code-panel">
-          <div className="panel-head">
+        <section className="mission-panel">
+          <div className="mission-panel-top">
             <div>
-              <p className="panel-kicker">Code Panel</p>
-              <h2>{activeStage.title}</h2>
+              <p className="eyebrow">현재 미션</p>
+              <h2>{activeStage.missionName}</h2>
               <p>{activeStage.subtitle}</p>
             </div>
-            <div className="mode-toggle" role="tablist" aria-label="Code mode">
-              <button
-                className={editorMode === 'blocks' ? 'selected' : ''}
-                onClick={() => setEditorMode('blocks')}
-                type="button"
-              >
-                Blocks
-              </button>
-              <button
-                className={editorMode === 'python' ? 'selected' : ''}
-                onClick={() => setEditorMode('python')}
-                type="button"
-              >
-                Python
-              </button>
+            <div className="difficulty-pill">{activeStage.difficulty}</div>
+          </div>
+
+          <div className="mission-grid">
+            <article className="mission-card">
+              <span className="brief-tag">핵심 개념</span>
+              <p>{activeStage.concept}</p>
+            </article>
+            <article className="mission-card">
+              <span className="brief-tag">목표</span>
+              <p>{activeStage.objective}</p>
+            </article>
+            <article className="mission-card">
+              <span className="brief-tag">입력 힌트</span>
+              <p>{activeStage.modeHint}</p>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <main className="game-board">
+        <section className="panel console-panel">
+          <div className="panel-head">
+            <div>
+              <p className="panel-kicker">코드 콘솔</p>
+              <h2>{activeStage.title}</h2>
+              <p>
+                {editorMode === 'blocks'
+                  ? '블록을 조립해 월드 규칙을 만드세요.'
+                  : '파이썬을 직접 수정해 월드 규칙을 만드세요.'}
+              </p>
+            </div>
+
+            <div className="mode-cluster">
+              <span className="mode-label">입력 방식 선택</span>
+              <div className="mode-toggle" role="tablist" aria-label="코드 입력 방식">
+                <button
+                  className={editorMode === 'blocks' ? 'selected' : ''}
+                  onClick={() => setEditorMode('blocks')}
+                  type="button"
+                >
+                  블록 코딩
+                </button>
+                <button
+                  className={editorMode === 'python' ? 'selected' : ''}
+                  onClick={() => setEditorMode('python')}
+                  type="button"
+                >
+                  파이썬 코드
+                </button>
+              </div>
             </div>
           </div>
 
@@ -372,7 +467,7 @@ function App() {
               />
             ) : (
               <textarea
-                aria-label={`${activeStage.title} Python editor`}
+                aria-label={`${activeStage.title} 파이썬 편집기`}
                 className="python-editor"
                 onChange={(event) => handlePythonChange(event.target.value)}
                 spellCheck={false}
@@ -381,20 +476,20 @@ function App() {
             )}
           </div>
 
-          <div className="controls">
+          <div className="control-deck">
             <button
               className="primary"
               disabled={isRunning}
               onClick={() => executeStage({ autoPlay: true })}
               type="button"
             >
-              {isRunning ? 'Running...' : 'Run'}
+              {isRunning ? '추적 중...' : '실행'}
             </button>
             <button className="secondary" disabled={isRunning} onClick={handleStep} type="button">
-              Step
+              한 단계
             </button>
             <label className="speed-control">
-              <span>Speed</span>
+              <span>재생 속도</span>
               <input
                 max="2"
                 min="0.6"
@@ -408,31 +503,98 @@ function App() {
           </div>
 
           <div className={`status-card ${activeExecution.error ? 'error' : ''}`}>
-            <strong>Status</strong>
-            <p>{statusMessage || 'Ready to trace the next recursive run.'}</p>
+            <strong>상태</strong>
+            <p>{statusMessage || activeStage.readyMessage}</p>
             {pythonWarning ? <p className="warning">{pythonWarning}</p> : null}
             {isRunStale && activeExecution.trace.length ? (
-              <p className="warning">Code changed after the last trace. Run again to refresh the animation.</p>
+              <p className="warning">
+                마지막 추적 이후 코드가 바뀌었습니다. 실행을 다시 눌러 월드를 새로 생성하세요.
+              </p>
             ) : null}
           </div>
         </section>
 
-        <section className="panel visual-panel">
-          <div className="panel-head">
+        <section className="panel arena-panel">
+          <div className="panel-head arena-head">
             <div>
-              <p className="panel-kicker">Visualization Panel</p>
-              <h2>{activeStage.shortLabel}</h2>
-              <p>Trace events replay here in time order.</p>
+              <p className="panel-kicker">플레이 아레나</p>
+              <h2>{activeStage.arenaName}</h2>
+              <p>재귀 호출의 시간순 흔적이 게임 월드 안에서 재생됩니다.</p>
             </div>
-            <div className="playback-badge">
-              <span>{activeExecution.playhead}</span>
-              <small>of {activeExecution.trace.length} events</small>
+
+            <div className="arena-readouts">
+              <div className="hud-unit small">
+                <span>재생 이벤트</span>
+                <strong>
+                  {activeExecution.playhead}/{activeExecution.trace.length}
+                </strong>
+              </div>
+              <div className="hud-unit small">
+                <span>최대 깊이</span>
+                <strong>{telemetry.maxDepth}</strong>
+              </div>
+              <div className="hud-unit small">
+                <span>이동 수</span>
+                <strong>{telemetry.moves}</strong>
+              </div>
             </div>
           </div>
 
           <div className="visual-frame">
             <StageVisualization execution={activeExecution} speed={speed} stageKey={activeStageKey} />
           </div>
+
+          <div className="telemetry-strip">
+            <div className="telemetry-card">
+              <span>호출 수</span>
+              <strong>{telemetry.calls}</strong>
+            </div>
+            <div className="telemetry-card">
+              <span>반환 수</span>
+              <strong>{telemetry.returns}</strong>
+            </div>
+            <div className="telemetry-card">
+              <span>현재 결과</span>
+              <strong>
+                {activeStageKey === 'stage3'
+                  ? `${visiblePegs?.C.length ?? 0}/3 도착`
+                  : activeExecution.result ?? '대기 중'}
+              </strong>
+            </div>
+            <div className="telemetry-card">
+              <span>세계 상태</span>
+              <strong>{completion[activeStageKey] ? '클리어' : '진행 중'}</strong>
+            </div>
+          </div>
+
+          <section className="event-feed-panel">
+            <div className="event-feed-header">
+              <h3>실시간 로그</h3>
+              <span>{recentEvents.length ? '최신 6개 이벤트' : '대기 중'}</span>
+            </div>
+
+            <div className="event-feed-list">
+              {recentEvents.length ? (
+                recentEvents.map((event, index) => (
+                  <article className={`feed-entry ${event.type}`} key={`${event.type}-${index}`}>
+                    <strong>
+                      {event.type === 'call'
+                        ? 'CALL'
+                        : event.type === 'return'
+                          ? 'RETURN'
+                          : 'MOVE'}
+                    </strong>
+                    <p>{formatEventLabel(event)}</p>
+                  </article>
+                ))
+              ) : (
+                <article className="feed-entry empty">
+                  <strong>WAIT</strong>
+                  <p>아직 재생된 이벤트가 없습니다. 코드를 실행하면 로그가 순서대로 쌓입니다.</p>
+                </article>
+              )}
+            </div>
+          </section>
         </section>
       </main>
     </div>

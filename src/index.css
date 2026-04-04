@@ -1,18 +1,18 @@
 :root {
-  font-family: 'Aptos', 'Segoe UI', 'Trebuchet MS', sans-serif;
+  font-family:
+    'Segoe UI Variable',
+    'Malgun Gothic',
+    'Apple SD Gothic Neo',
+    'Noto Sans KR',
+    sans-serif;
   line-height: 1.5;
   font-weight: 500;
-  color: #10253d;
-  background:
-    radial-gradient(circle at top, rgba(255, 209, 135, 0.28), transparent 32%),
-    linear-gradient(180deg, #fff8ef 0%, #f0e9de 100%);
+  color: #edf6ff;
+  background: #050814;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --ink: #10253d;
-  --muted: #546679;
-  --muted-strong: #31465d;
 }
 
 * {
@@ -28,6 +28,10 @@ body,
 body {
   margin: 0;
   min-width: 320px;
+  background:
+    radial-gradient(circle at top, rgba(35, 69, 135, 0.45), transparent 28%),
+    radial-gradient(circle at 80% 10%, rgba(28, 120, 140, 0.22), transparent 22%),
+    linear-gradient(180deg, #050814 0%, #04070f 100%);
 }
 
 button,
@@ -38,4 +42,8 @@ textarea {
 
 a {
   color: inherit;
+}
+
+::selection {
+  background: rgba(95, 177, 255, 0.28);
 }
