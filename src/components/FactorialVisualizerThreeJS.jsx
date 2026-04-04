@@ -18,10 +18,10 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
     scene.background = new THREE.Color(0xf8fbff)
     sceneRef.current = scene
 
-    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 200)
-    const stackHeight = frames.length * 1.5
-    camera.position.set(0, stackHeight / 2, Math.max(30, stackHeight * 1.3))
-    camera.lookAt(0, stackHeight / 2, 0)
+    const stackHeight = Math.max(1, frames.length * 1.5)
+    const camera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 200)
+    camera.position.set(0, 0, 40)
+    camera.lookAt(0, 0, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.shadowMap.enabled = true
@@ -37,18 +37,36 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
     directional.shadow.mapSize.height = 1024
     scene.add(ambient, directional)
 
-    const grid = new THREE.GridHelper(30, 30, 0xcccccc, 0xeeeeee)
+    const grid = new THREE.GridHelper(24, 24, 0xcccccc, 0xeeeeee)
     grid.position.y = -0.5
     scene.add(grid)
 
+    const centerGuide = new THREE.Mesh(
+      new THREE.RingGeometry(0.8, 0.84, 32),
+      new THREE.MeshBasicMaterial({
+        color: 0x94a3b8,
+        transparent: true,
+        opacity: 0.35,
+        side: THREE.DoubleSide,
+      }),
+    )
+    centerGuide.rotation.x = Math.PI / 2
+    centerGuide.position.set(0, stackHeight / 2, 0)
+    scene.add(centerGuide)
+
     frameMeshesRef.current = []
+
+    const stackGroup = new THREE.Group()
+    scene.add(stackGroup)
+
+    const verticalOffset = (stackHeight - 1.5) / 2
 
     frames.forEach((frame, index) => {
       // 단순 회색톤 사용
-      const grayShade = 0.3 + (index % 3) * 0.25
+      const grayShade = 0.24 + (index % 3) * 0.2
       const color = new THREE.Color(grayShade, grayShade, grayShade)
       
-      const geometry = new THREE.BoxGeometry(2, 1.2, 2)
+      const geometry = new THREE.BoxGeometry(2.2, 1.2, 2.2)
       const material = new THREE.MeshStandardMaterial({
         color,
         roughness: 0.6,
@@ -58,9 +76,9 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
       })
 
       const mesh = new THREE.Mesh(geometry, material)
-      mesh.castShadow = true
-      mesh.receiveShadow = true
-      mesh.position.set(0, index * 1.5 + 0.6, 0)
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+        mesh.position.set(0, index * 1.5 - verticalOffset, 0)
 
       // 큰 텍스트 캔버스로 가독성 개선
       const textCanvas = document.createElement('canvas')
@@ -85,20 +103,25 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
 
         const texture = new THREE.CanvasTexture(textCanvas)
         const labelMaterial = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide })
-        const labelGeometry = new THREE.PlaneGeometry(2.2, 1)
+        const labelGeometry = new THREE.PlaneGeometry(2.35, 1)
         const labelMesh = new THREE.Mesh(labelGeometry, labelMaterial)
-        labelMesh.position.z = 1.05
+        labelMesh.position.z = 1.15
         mesh.add(labelMesh)
       }
 
-      scene.add(mesh)
+      stackGroup.add(mesh)
       frameMeshesRef.current.push(mesh)
     })
 
     const resize = () => {
       const width = mountNode.clientWidth
       const height = mountNode.clientHeight
-      camera.aspect = width / height
+      const aspect = width / Math.max(1, height)
+      const frustumHeight = Math.max(9, stackHeight + 2)
+      camera.top = frustumHeight / 2
+      camera.bottom = -frustumHeight / 2
+      camera.left = (-frustumHeight * aspect) / 2
+      camera.right = (frustumHeight * aspect) / 2
       camera.updateProjectionMatrix()
       renderer.setSize(width, height, false)
     }
@@ -120,7 +143,7 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
           // 회전 애니메이션 제거 - 정보 시각화에만 집중
           if (frames[i]?.returned) {
             // 반환된 박스는 살짝 위아래로 움직임
-            mesh.position.y = i * 1.5 + 0.6 + Math.sin(now * 0.002 + i) * 0.08
+            mesh.position.y = i * 1.5 - verticalOffset + Math.sin(now * 0.002 + i) * 0.05
           }
         })
         renderer.render(scene, camera)
@@ -153,18 +176,30 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
   }, [frames])
 
   return (
-    <div style={{ height: '100%', width: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100%', width: '100%', position: 'relative' }}>
       <div
         ref={mountRef}
         style={{
-          flex: 1,
+          position: 'absolute',
+          inset: 0,
           width: '100%',
-          minHeight: 0,
           borderRadius: '8px',
           overflow: 'hidden',
         }}
       />
-      <div style={{ paddingTop: '8px', fontSize: '0.85rem', color: '#64748b' }}>
+      <div
+        style={{
+          position: 'absolute',
+          left: '10px',
+          bottom: '10px',
+          fontSize: '0.85rem',
+          color: '#64748b',
+          background: 'rgba(255, 255, 255, 0.86)',
+          border: '1px solid #d1d5db',
+          borderRadius: '8px',
+          padding: '6px 8px',
+        }}
+      >
         {finalResult !== null ? `결과: ${finalResult}` : '실행 중...'}
       </div>
     </div>
