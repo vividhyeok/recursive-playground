@@ -7,6 +7,11 @@ function BlocklyEditor({ stage, workspaceData, onWorkspaceChange }) {
   const applyingExternalStateRef = useRef(false)
   const initialWorkspaceRef = useRef(workspaceData)
   const serializedWorkspaceRef = useRef('')
+  const onWorkspaceChangeRef = useRef(onWorkspaceChange)
+
+  useEffect(() => {
+    onWorkspaceChangeRef.current = onWorkspaceChange
+  }, [onWorkspaceChange])
 
   useEffect(() => {
     const { Blockly } = setupBlockly()
@@ -59,7 +64,7 @@ function BlocklyEditor({ stage, workspaceData, onWorkspaceChange }) {
 
       serializedWorkspaceRef.current = nextSerialized
 
-      onWorkspaceChange({
+      onWorkspaceChangeRef.current({
         workspaceData: nextWorkspaceData,
         code: generateCodeForFunction(workspace, stage.functionBlockType),
       })
@@ -77,7 +82,7 @@ function BlocklyEditor({ stage, workspaceData, onWorkspaceChange }) {
       resizeObserver.disconnect()
       workspace.dispose()
     }
-  }, [onWorkspaceChange, stage])
+  }, [stage])
 
   useEffect(() => {
     const { Blockly } = setupBlockly()
