@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import BlocklyEditor from './components/BlocklyEditor.jsx'
-import FactorialVisualizer from './components/FactorialVisualizer.jsx'
+import FactorialVisualizerThreeJS from './components/FactorialVisualizerThreeJS.jsx'
 import FibonacciVisualizer from './components/FibonacciVisualizer.jsx'
 import HanoiVisualizer from './components/HanoiVisualizer.jsx'
 import { STAGES, STAGE_ORDER, getInitialStage, isStageUnlocked } from './data/stages'
@@ -73,7 +73,7 @@ function StageVisualization({ stageKey, execution, speed }) {
   const visibleTrace = execution.trace.slice(0, execution.playhead)
 
   if (stageKey === 'stage1') {
-    return <FactorialVisualizer execution={execution} visibleTrace={visibleTrace} />
+    return <FactorialVisualizerThreeJS execution={execution} visibleTrace={visibleTrace} />
   }
 
   if (stageKey === 'stage2') {

@@ -31,12 +31,16 @@ function buildStatementBlock(type, label, color) {
   }
 }
 
-function buildIfNumericBlock(type, leftLabel, fieldName, rightLabel, color, defaultValue = 1) {
+function buildIfNumericBlock(type, leftLabel, fieldName, rightLabel, color) {
+  const options = Array.from({ length: 10 }, (_, i) => {
+    const num = i + 1
+    return [String(num), String(num)]
+  })
   Blockly.Blocks[type] = {
     init() {
       this.appendDummyInput()
         .appendField(leftLabel)
-        .appendField(new Blockly.FieldNumber(defaultValue, -999, 999, 1), fieldName)
+        .appendField(new Blockly.FieldDropdown(options), fieldName)
         .appendField(rightLabel)
       this.appendStatementInput('BODY').setCheck('rpStatement')
       this.setPreviousStatement(true, 'rpStatement')
@@ -47,12 +51,16 @@ function buildIfNumericBlock(type, leftLabel, fieldName, rightLabel, color, defa
   }
 }
 
-function buildReturnNumericBlock(type, fieldName, color, defaultValue = 1) {
+function buildReturnNumericBlock(type, fieldName, color) {
+  const options = Array.from({ length: 10 }, (_, i) => {
+    const num = i + 1
+    return [String(num), String(num)]
+  })
   Blockly.Blocks[type] = {
     init() {
       this.appendDummyInput()
         .appendField('return')
-        .appendField(new Blockly.FieldNumber(defaultValue, -999, 999, 1), fieldName)
+        .appendField(new Blockly.FieldDropdown(options), fieldName)
       this.setPreviousStatement(true, 'rpStatement')
       this.setNextStatement(true, 'rpStatement')
       this.setColour(color)
