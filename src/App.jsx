@@ -8,6 +8,7 @@ import CountdownVisualizer from './components/CountdownVisualizer.jsx'
 import QuadtreeVisualizer from './components/QuadtreeVisualizer.jsx'
 import SwapVisualizer from './components/SwapVisualizer.jsx'
 import MazeVisualizer from './components/MazeVisualizer.jsx'
+import PythonEditor from './components/PythonEditor.jsx'
 import { STAGES, STAGE_ORDER, getInitialStage, isStageUnlocked } from './data/stages'
 import { runStudentCode } from './lib/pyodideRunner'
 import { persistStageCode, persistStageCompletion, readStoredProgress } from './lib/storage'
@@ -491,11 +492,9 @@ function App() {
                 workspaceData={workspaceStates[activeStageKey]}
               />
             ) : (
-              <textarea
-                aria-label={`${activeStage.title} 파이썬 편집기`}
-                className="python-editor"
-                onChange={(event) => handlePythonChange(event.target.value)}
-                spellCheck={false}
+              <PythonEditor
+                ariaLabel={`${activeStage.title} 파이썬 편집기`}
+                onChange={handlePythonChange}
                 value={activeCode}
               />
             )}
