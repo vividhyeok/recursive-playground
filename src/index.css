@@ -3,23 +3,23 @@
   line-height: 1.5;
   font-weight: 400;
 
-  /* Premium Dark Theme Colors */
-  --color-bg-root: #090c10;
-  --color-bg-panel: #161b22;
-  --color-bg-glass: rgba(22, 27, 34, 0.65);
+  /* Scratch/Blockly Inspired Light Theme Colors */
+  --color-bg-root: #e9eef2;
+  --color-bg-panel: #ffffff;
+  --color-bg-glass: rgba(255, 255, 255, 0.85);
   
-  --color-border: #30363d;
-  --color-border-glow: rgba(56, 189, 248, 0.3);
+  --color-border: #d1d9e0;
+  --color-border-glow: rgba(76, 151, 255, 0.3);
   
-  --color-text-primary: #e6edf3;
-  --color-text-secondary: #8b949e;
+  --color-text-primary: #333333;
+  --color-text-secondary: #666666;
   
-  --color-accent: #2f81f7;
-  --color-accent-hover: #3b8bfd;
+  --color-accent: #4c97ff;
+  --color-accent-hover: #3373cc;
   
-  --color-success: #238636;
-  --color-error: #da3633;
-  --color-warning: #d29922;
+  --color-success: #4cbf56;
+  --color-error: #ff6680;
+  --color-warning: #ffbf00;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

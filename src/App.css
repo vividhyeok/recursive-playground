@@ -103,7 +103,7 @@
 /* Game pane gets a specific flex-basis to control split */
 .game-pane {
   flex: 1.1;
-  background: radial-gradient(circle at center, #0f141a 0%, var(--color-bg-root) 100%);
+  background: radial-gradient(circle at center, #f4f7f9 0%, var(--color-bg-root) 100%);
 }
 
 .code-pane {
@@ -118,7 +118,7 @@
   padding: 12px 20px;
   min-height: 52px;
   border-bottom: 1px solid var(--color-border);
-  background: rgba(22, 27, 34, 0.8);
+  background: var(--color-bg-glass);
   backdrop-filter: blur(8px);
   z-index: 5;
 }
@@ -150,10 +150,10 @@
 .telemetry-bar .metric {
   font-size: 0.8rem;
   color: var(--color-text-secondary);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   padding: 4px 8px;
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .visualizer-viewport {
@@ -174,11 +174,11 @@
   align-items: center;
   gap: 20px;
   padding: 12px 20px;
-  background: rgba(13, 17, 23, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--color-border);
   border-radius: 12px;
   backdrop-filter: blur(12px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   z-index: 20;
 }
 
@@ -217,9 +217,9 @@
 }
 
 .step-btn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.04);
   color: var(--color-text-primary);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--color-border);
   padding: 8px 16px;
   border-radius: 6px;
   font-size: 0.95rem;
@@ -228,7 +228,7 @@
 }
 
 .step-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(0, 0, 0, 0.08);
 }
 .step-btn:disabled {
   opacity: 0.4;
@@ -236,9 +236,9 @@
 }
 
 @keyframes pulse-glow {
-  0% { box-shadow: 0 0 10px rgba(47, 129, 247, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(47, 129, 247, 0.8); }
-  100% { box-shadow: 0 0 10px rgba(47, 129, 247, 0.4); }
+  0% { box-shadow: 0 0 10px rgba(76, 151, 255, 0.4); }
+  50% { box-shadow: 0 0 20px rgba(76, 151, 255, 0.8); }
+  100% { box-shadow: 0 0 10px rgba(76, 151, 255, 0.4); }
 }
 
 .speed-slider {
@@ -248,8 +248,8 @@
   color: var(--color-text-secondary);
   font-size: 0.85rem;
   padding: 0 16px;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .speed-slider input[type="range"] {
@@ -265,7 +265,7 @@
 
 .status-text {
   font-size: 0.8rem;
-  color: #a5d6ff;
+  color: var(--color-accent);
 }
 
 .result-badge {
@@ -273,16 +273,16 @@
   color: var(--color-text-primary);
 }
 .result-badge strong {
-  color: #7ee787;
+  color: var(--color-success);
 }
 
 /* --- Code Pane Specifics --- */
 .mode-toggle {
   display: flex;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.06);
   border-radius: 6px;
   padding: 2px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--color-border);
 }
 
 .mode-toggle button {
@@ -297,9 +297,9 @@
 }
 
 .mode-toggle button.selected {
-  background: rgba(255, 255, 255, 0.1);
+  background: #ffffff;
   color: var(--color-text-primary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .editor-viewport {
@@ -314,7 +314,7 @@
   height: 100%;
   padding: 20px;
   background: var(--color-bg-panel);
-  color: #e6edf3;
+  color: #24292e;
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.6;
@@ -531,21 +531,21 @@
 }
 
 .ide-layout .blocklyToolboxDiv {
-  background: #0d1117 !important;
+  background: #f4f7f9 !important;
   color: var(--color-text-primary) !important;
   border-right: 1px solid var(--color-border) !important;
 }
 
 .ide-layout .blocklyFlyoutBackground {
-  fill: #161b22 !important;
+  fill: #e9eef2 !important;
 }
 
 .ide-layout .blocklyTreeRow:not(.blocklyTreeSelected):hover {
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: rgba(0, 0, 0, 0.05) !important;
 }
 
 .ide-layout .blocklyTreeSelected {
-  background: rgba(47, 129, 247, 0.2) !important;
+  background: rgba(76, 151, 255, 0.15) !important;
 }
 
 .ide-layout .blocklyTreeLabel {
@@ -553,17 +553,18 @@
 }
 
 .ide-layout .blocklyScrollbarHandle {
-  fill: #30363d !important;
+  fill: #ccd4db !important;
 }
 
 .ide-layout .blocklyZoom > image,
 .ide-layout .blocklyTrash > image {
-  filter: invert(1) opacity(0.6);
+  filter: none;
+  opacity: 0.6;
 }
 
 .ide-layout .blocklyZoom > image:hover,
 .ide-layout .blocklyTrash > image:hover {
-  filter: invert(1) opacity(1);
+  opacity: 1;
 }
 
 @media (max-width: 1120px) {

@@ -64,6 +64,29 @@ def move_disk(source, target):
         "to": target,
     })
 
+def swap_items(left, right):
+    trace_events.append({
+        "type": "swap",
+        "left": left,
+        "right": right,
+    })
+
+def is_exit(x, y):
+    trace_events.append({
+        "type": "check_exit",
+        "x": x,
+        "y": y,
+    })
+    return x == 4 and y == 4
+
+def get_neighbors(x, y):
+    trace_events.append({
+        "type": "get_neighbors",
+        "x": x,
+        "y": y,
+    })
+    return [(x+1, y), (x, y+1), (x-1, y), (x, y-1)]
+
 def tracer(frame, event, arg):
     global call_depth
     name = frame.f_code.co_name
@@ -92,6 +115,9 @@ def tracer(frame, event, arg):
 
 namespace = {
     "move_disk": move_disk,
+    "swap": swap_items,
+    "is_exit": is_exit,
+    "get_neighbors": get_neighbors,
 }
 result = None
 error = None

@@ -1,16 +1,5 @@
-const STORAGE_KEYS = {
-  stage1: {
-    complete: 'rp_stage1_complete',
-    code: 'rp_stage1_code',
-  },
-  stage2: {
-    complete: 'rp_stage2_complete',
-    code: 'rp_stage2_code',
-  },
-  stage3: {
-    complete: 'rp_stage3_complete',
-    code: 'rp_stage3_code',
-  },
+function getStorageKey(stageKey, type) {
+  return `rp_${stageKey}_${type}`
 }
 
 function safeLocalStorage() {
@@ -30,8 +19,8 @@ export function readStoredProgress(stages) {
 
   return Object.fromEntries(
     Object.keys(stages).map((stageKey) => {
-      const codeKey = STORAGE_KEYS[stageKey].code
-      const completeKey = STORAGE_KEYS[stageKey].complete
+      const codeKey = getStorageKey(stageKey, 'code')
+      const completeKey = getStorageKey(stageKey, 'complete')
 
       return [
         stageKey,
@@ -50,7 +39,7 @@ export function persistStageCode(stageKey, code) {
     return
   }
 
-  storage.setItem(STORAGE_KEYS[stageKey].code, code)
+  storage.setItem(getStorageKey(stageKey, 'code'), code)
 }
 
 export function persistStageCompletion(stageKey, complete) {
@@ -59,5 +48,5 @@ export function persistStageCompletion(stageKey, complete) {
     return
   }
 
-  storage.setItem(STORAGE_KEYS[stageKey].complete, String(Boolean(complete)))
+  storage.setItem(getStorageKey(stageKey, 'complete'), String(Boolean(complete)))
 }

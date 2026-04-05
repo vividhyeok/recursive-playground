@@ -4,6 +4,10 @@ import BlocklyEditor from './components/BlocklyEditor.jsx'
 import FactorialVisualizerThreeJS from './components/FactorialVisualizerThreeJS.jsx'
 import FibonacciVisualizer from './components/FibonacciVisualizer.jsx'
 import HanoiVisualizer from './components/HanoiVisualizer.jsx'
+import CountdownVisualizer from './components/CountdownVisualizer.jsx'
+import QuadtreeVisualizer from './components/QuadtreeVisualizer.jsx'
+import SwapVisualizer from './components/SwapVisualizer.jsx'
+import MazeVisualizer from './components/MazeVisualizer.jsx'
 import { STAGES, STAGE_ORDER, getInitialStage, isStageUnlocked } from './data/stages'
 import { runStudentCode } from './lib/pyodideRunner'
 import { persistStageCode, persistStageCompletion, readStoredProgress } from './lib/storage'
@@ -54,8 +58,6 @@ function summarizeTrace(events) {
         summary.maxDepth = Math.max(summary.maxDepth, Number(event.depth) || 0)
       } else if (event.type === 'return') {
         summary.returns += 1
-      } else if (event.type === 'move') {
-        summary.moves += 1
       }
 
       return summary
@@ -63,7 +65,6 @@ function summarizeTrace(events) {
     {
       calls: 0,
       returns: 0,
-      moves: 0,
       maxDepth: 0,
     },
   )
@@ -72,22 +73,22 @@ function summarizeTrace(events) {
 function StageVisualization({ stageKey, execution, speed }) {
   const visibleTrace = execution.trace.slice(0, execution.playhead)
 
-  if (stageKey === 'stage1') {
-    return <FactorialVisualizerThreeJS execution={execution} visibleTrace={visibleTrace} />
+  if (stageKey === 'stage1') return <CountdownVisualizer visibleTrace={visibleTrace} />
+  if (stageKey === 'stage2') return <FactorialVisualizerThreeJS execution={execution} visibleTrace={visibleTrace} />
+  if (stageKey === 'stage3') return <QuadtreeVisualizer visibleTrace={visibleTrace} />
+  if (stageKey === 'stage4') return <SwapVisualizer visibleTrace={visibleTrace} />
+  if (stageKey === 'stage5') return <MazeVisualizer visibleTrace={visibleTrace} />
+  if (stageKey === 'stage6') {
+    return (
+      <HanoiVisualizer
+        executionId={execution.executionId}
+        fullTrace={visibleTrace}
+        moveDuration={Math.max(360, 1100 / speed)}
+        visibleTrace={visibleTrace}
+      />
+    )
   }
-
-  if (stageKey === 'stage2') {
-    return <FibonacciVisualizer execution={execution} visibleTrace={visibleTrace} />
-  }
-
-  return (
-    <HanoiVisualizer
-      executionId={execution.executionId}
-      fullTrace={visibleTrace}
-      moveDuration={Math.max(360, 1100 / speed)}
-      visibleTrace={visibleTrace}
-    />
-  )
+  return null
 }
 
 function App() {
@@ -147,6 +148,9 @@ function App() {
           isPlaying: false,
         },
       }))
+      if (activeExecution.error) {
+        setStatusMessage(`오류로 중단됨: ${activeExecution.error}`)
+      }
       return undefined
     }
 
@@ -256,14 +260,18 @@ function App() {
           result: payload.result,
           error: payload.error,
           playhead: autoPlay ? 0 : Math.min(1, payload.trace.length),
-          isPlaying: autoPlay && !payload.error && payload.trace.length > 0,
+          isPlaying: autoPlay && payload.trace.length > 0,
           codeSnapshot: activeCode,
           executionId: current[activeStageKey].executionId + 1,
         },
       }))
 
       if (payload.error) {
-        setStatusMessage(payload.error)
+        if (autoPlay && payload.trace.length > 0) {
+          setStatusMessage('오답입니다. 에러 발생 전까지의 과정을 재생합니다...')
+        } else {
+          setStatusMessage(payload.error)
+        }
         return
       }
 
