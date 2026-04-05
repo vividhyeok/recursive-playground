@@ -160,26 +160,20 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-  padding: 20px;
-  /* Visual components need this space to breath, we'll let them render inside this flex wrapper */
+  min-height: 0;
 }
 
-/* --- Floating Game HUD --- */
+/* --- Docked Game HUD (bottom bar) --- */
 .execution-hud {
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  z-index: 20;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px 20px;
+  background: #f4f7f9;
+  border-top: 1px solid var(--color-border);
+  z-index: 5;
+  flex-shrink: 0;
 }
 
 .playback-controls {
@@ -266,10 +260,10 @@
 .status-text {
   font-size: 0.8rem;
   color: var(--color-accent);
-  max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 300px;
 }
 
 .result-badge {
@@ -362,6 +356,98 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* --- Stage Info Panel --- */
+.stage-info {
+  padding: 12px 20px;
+  background: #fafbfc;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.83rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 240px;
+}
+
+.stage-info p {
+  margin: 3px 0;
+}
+
+.stage-info strong {
+  color: var(--color-text-primary);
+}
+
+.stage-info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.stage-info-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #e9eef2;
+  color: #444;
+  border: 1px solid #d1d9e0;
+  border-radius: 10px;
+  padding: 2px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* --- Hint Panel --- */
+.hint-panel {
+  margin-top: 10px;
+  border-top: 1px dashed #d1d9e0;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hint-item {
+  background: #fffbec;
+  border: 1px solid #f5c518;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  color: #7a5c00;
+  line-height: 1.5;
+}
+
+.hint-item strong {
+  color: #c97d00;
+  margin-right: 6px;
+}
+
+.hint-btn {
+  align-self: flex-start;
+  background: #fff9e6;
+  border: 1px solid #f5c518;
+  color: #8a6400;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.hint-btn:hover {
+  background: #fff3cc;
+  box-shadow: 0 2px 8px rgba(200, 150, 0, 0.2);
+}
+
+.hint-exhausted {
+  font-size: 0.8rem;
+  color: #4ac26b;
+  font-style: italic;
+  margin: 0;
+}
+
 .factorial-plan-view {
   height: 100%;
   width: 100%;

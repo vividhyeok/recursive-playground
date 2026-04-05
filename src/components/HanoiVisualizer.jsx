@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { deriveHanoiCallStack, simulateHanoi } from '../lib/stageUtils'
 
 export default function HanoiVisualizer({ visibleTrace }) {
-  const diskCount = 4
+  const diskCount = 3
   const pegs = useMemo(() => simulateHanoi(visibleTrace, diskCount), [visibleTrace, diskCount])
   const activeStack = useMemo(() => deriveHanoiCallStack(visibleTrace), [visibleTrace])
 
@@ -14,25 +14,22 @@ export default function HanoiVisualizer({ visibleTrace }) {
   const pegLabels = ['A', 'B', 'C']
 
   const getDiskWidth = (diskSize) => {
-    // 1~4 사이즈를 가짐
-    const widths = { 1: 50, 2: 90, 3: 130, 4: 170 }
-    return widths[diskSize] ?? 170
+    const widths = { 1: 70, 2: 130, 3: 180 }
+    return widths[diskSize] ?? 180
   }
 
   const getDiskColor = (diskSize) => {
-    const colors = { 1: '#00d2ff', 2: '#4cbf56', 3: '#ffbf00', 4: '#ff6680' }
+    const colors = { 1: '#4c97ff', 2: '#ffbf00', 3: '#ff6680' }
     return colors[diskSize] ?? '#4cbf56'
   }
 
   return (
-    <div style={{ padding: '30px 40px 100px 40px', boxSizing: 'border-box', display: 'flex', gap: 40, height: '100%', background: '#ffffff', overflowY: 'auto' }}>
-      
-      {/* 2D 하노이 탑 그래픽 영역 */}
-      <div style={{ flex: 2, display: 'flex', flexDirection: 'column', height: '100%', minWidth: 400 }}>
-        <h3 style={{color: '#333'}}>하노이 탑 이동 보드</h3>
-        <p style={{color: '#666', marginBottom: 20}}>현재까지 총 <strong>{moveCount}</strong>번 이동 완료</p>
+    <div style={{ padding: '24px', boxSizing: 'border-box', display: 'flex', gap: 24, height: '100%', background: '#ffffff', overflow: 'hidden' }}>
+<div style={{ flex: 2, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100%' }}>
+        <h3 style={{ color: '#333', margin: '0 0 4px 0', fontSize: '1rem' }}>하노이 탑 이동 보드</h3>
+        <p style={{ color: '#888', marginBottom: 12, fontSize: '0.85rem' }}>현재까지 총 <strong style={{color:'#333'}}>{moveCount}</strong>번 이동</p>
 
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', paddingBottom: 30, borderBottom: '8px solid #d1d9e0', position: 'relative' }}>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'space-around', alignItems: 'flex-end', paddingBottom: 44, borderBottom: '4px solid #e9eef2', position: 'relative', minHeight: 0 }}>
           {pegLabels.map((peg) => (
             <div key={peg} style={{ position: 'relative', width: 200, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
               {/* 기둥 막대기 */}

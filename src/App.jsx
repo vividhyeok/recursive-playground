@@ -105,6 +105,7 @@ function App() {
   const [isRunning, setIsRunning] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
   const [pythonWarning, setPythonWarning] = useState('')
+  const [hintCounts, setHintCounts] = useState({})
   const executeStageRef = useRef(null)
   const handleStepRef = useRef(null)
 
@@ -245,7 +246,7 @@ function App() {
 
     try {
       const payload = await runStudentCode(stage, activeCode)
-      const pegs = stage.key === 'stage3' ? simulateHanoi(payload.trace) : null
+      const pegs = stage.key === 'stage6' ? simulateHanoi(payload.trace, 3) : null
       const stagePassed =
         !payload.error &&
         stage.validate({
@@ -282,8 +283,8 @@ function App() {
           [activeStageKey]: true,
         }))
         setStatusMessage(stage.successMessage)
-      } else if (stage.key === 'stage3') {
-        setStatusMessage('의식은 재생됐지만 아직 모든 원반이 C 기둥에 모이지 않았습니다.')
+      } else if (stage.key === 'stage6') {
+        setStatusMessage('하노이 시뮬레이션은 재생됐지만, 아직 모든 원반이 C 기둥에 모이지 않았습니다.')
       } else {
         setStatusMessage('흐름은 재생됐지만 목표 결과가 아직 맞지 않습니다.')
       }
@@ -423,7 +424,7 @@ function App() {
             <StageVisualization execution={activeExecution} speed={speed} stageKey={activeStageKey} />
           </div>
 
-          <div className="execution-hud glass-panel">
+          <div className="execution-hud">
             <div className="playback-controls">
               <button
                 className={`play-btn ${isRunning ? 'running' : ''}`}
@@ -498,10 +499,42 @@ function App() {
             </div>
           </header>
 
-          <div className="stage-info" style={{ padding: '12px 20px', background: 'rgba(0, 0, 0, 0.02)', borderBottom: '1px solid var(--color-border)', fontSize: '0.85rem', color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
-            <p style={{ margin: '0 0 6px 0' }}><strong style={{color: 'var(--color-text-primary)'}}>문제:</strong> {activeStage.objective}</p>
-            <p style={{ margin: '0 0 6px 0' }}><strong style={{color: 'var(--color-text-primary)'}}>설명:</strong> {activeStage.concept}</p>
-            <p style={{ margin: '0' }}><strong style={{color: 'var(--color-text-primary)'}}>실행 방식:</strong> 코드 실행 시 서버가 보이지 않게 <code>{activeStage.entryExpression}</code> 호출을 시도합니다.</p>
+          <div className="stage-info">
+            <div className="stage-info-row">
+              <span className="stage-info-badge">{activeStage.difficulty}</span>
+              <p><strong>문제:</strong> {activeStage.objective}</p>
+            </div>
+            <p style={{ margin: '4px 0' }}><strong>개념:</strong> {activeStage.concept}</p>
+            {activeStage.providedFunctions && (
+              <p style={{ margin: '4px 0', color: 'var(--color-accent)' }}>
+                <strong>제공 함수:</strong> {activeStage.providedFunctions}
+              </p>
+            )}
+            <p style={{ margin: '4px 0', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+              실행 시 자동으로 <code style={{ background: '#e9eef2', padding: '1px 5px', borderRadius: 3 }}>{activeStage.entryExpression}</code> 을(를) 호출합니다.
+            </p>
+
+            {/* Hint Panel */}
+            {activeStage.hints && activeStage.hints.length > 0 && (
+              <div className="hint-panel">
+                {activeStage.hints.slice(0, hintCounts[activeStageKey] || 0).map((hint, i) => (
+                  <div key={i} className="hint-item">
+                    <strong>힌트 {i + 1}</strong> {hint}
+                  </div>
+                ))}
+                {(hintCounts[activeStageKey] || 0) < activeStage.hints.length ? (
+                  <button
+                    className="hint-btn"
+                    type="button"
+                    onClick={() => setHintCounts(c => ({ ...c, [activeStageKey]: (c[activeStageKey] || 0) + 1 }))}
+                  >
+                    💡 힌트 {(hintCounts[activeStageKey] || 0) + 1} 보기 ({activeStage.hints.length - (hintCounts[activeStageKey] || 0)}개 남음)
+                  </button>
+                ) : (
+                  <p className="hint-exhausted">모든 힌트를 확인했습니다. 이제 직접 해보세요!</p>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="editor-viewport">
