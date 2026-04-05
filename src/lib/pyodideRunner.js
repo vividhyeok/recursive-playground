@@ -79,13 +79,22 @@ def is_exit(x, y):
     })
     return x == 4 and y == 4
 
+visited_maze_cells = set()
+WALLS = {(0,1), (1,1), (1,3), (2,3), (3,1), (4,3)}
+
 def get_neighbors(x, y):
     trace_events.append({
         "type": "get_neighbors",
         "x": x,
         "y": y,
     })
-    return [(x+1, y), (x, y+1), (x-1, y), (x, y-1)]
+    visited_maze_cells.add((x, y))
+    moves = []
+    for nx, ny in [(x+1, y), (x, y+1), (x-1, y), (x, y-1)]:
+        if 0 <= nx < 5 and 0 <= ny < 5:
+            if (nx, ny) not in WALLS and (nx, ny) not in visited_maze_cells:
+                moves.append((nx, ny))
+    return moves
 
 def tracer(frame, event, arg):
     global call_depth

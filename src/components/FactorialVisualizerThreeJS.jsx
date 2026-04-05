@@ -51,23 +51,23 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
             <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb" />
           </marker>
           <linearGradient id="call-box" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#7c3aed" />
-            <stop offset="100%" stopColor="#3b82f6" />
+            <stop offset="0%" stopColor="#4c97ff" />
+            <stop offset="100%" stopColor="#3373cc" />
           </linearGradient>
           <linearGradient id="result-box" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#111827" />
-            <stop offset="100%" stopColor="#1f2937" />
+            <stop offset="0%" stopColor="#4cbf56" />
+            <stop offset="100%" stopColor="#3b9643" />
           </linearGradient>
         </defs>
 
         <rect x="18" y="18" width={viewWidth - 36} height={viewHeight - 36} rx="22" fill="#f8fbff" stroke="#dbe4f0" />
-        <text x={viewWidth / 2} y="44" textAnchor="middle" className="factorial-plan-title">
+        <text x={viewWidth / 2} y="44" textAnchor="middle" className="factorial-plan-title" fill="#333" fontWeight="bold" fontSize="18">
           재귀 호출은 아래로, 반환은 곱셈으로 올라옵니다
         </text>
-        <text x="34" y="58" className="factorial-lane-label">
+        <text x="34" y="58" className="factorial-lane-label" fill="#666" fontWeight="bold">
           호출 스택
         </text>
-        <text x={viewWidth - 164} y="58" className="factorial-lane-label">
+        <text x={viewWidth - 164} y="58" className="factorial-lane-label" fill="#666" fontWeight="bold">
           반환 / 곱셈
         </text>
 
@@ -116,10 +116,10 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
                 strokeWidth="2"
                 opacity="0.96"
               />
-              <text x={callX + callBoxWidth / 2} y={y + 23} textAnchor="middle" className="factorial-box-title">
+              <text x={callX + callBoxWidth / 2} y={y + 23} textAnchor="middle" fill="#ffffff" fontWeight="bold">
                 factorial({frame.n})
               </text>
-              <text x={callX + callBoxWidth / 2} y={y + 41} textAnchor="middle" className="factorial-box-subtitle">
+              <text x={callX + callBoxWidth / 2} y={y + 41} textAnchor="middle" fill="#e2e8f0" fontSize="13">
                 호출 깊이 {frame.depth}
               </text>
 
@@ -133,7 +133,7 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
                 markerEnd="url(#arrow-head)"
               />
               {!isTail && (
-                <text x={callX + callBoxWidth / 2 + 12} y={y + rowGap / 2 + 6} className="factorial-arrow-label">
+                <text x={callX + callBoxWidth / 2 + 12} y={y + rowGap / 2 + 6} fill="#64748b" fontWeight="bold">
                   n - 1
                 </text>
               )}
@@ -150,7 +150,8 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
                 x={(callX + callBoxWidth + resultX) / 2}
                 y={y + 20}
                 textAnchor="middle"
-                className="factorial-formula"
+                fill={frame.returned ? '#2563eb' : '#94a3b8'}
+                fontWeight="bold"
               >
                 {formulaText}
               </text>
@@ -165,17 +166,17 @@ function FactorialVisualizerThreeJS({ visibleTrace }) {
                 stroke={frame.returned ? '#60a5fa' : '#334155'}
                 strokeWidth="2"
               />
-              <text x={resultX + resultBoxWidth / 2} y={y + 23} textAnchor="middle" className="factorial-box-title">
+              <text x={resultX + resultBoxWidth / 2} y={y + 23} textAnchor="middle" fill="#ffffff" fontWeight="bold">
                 반환
               </text>
-              <text x={resultX + resultBoxWidth / 2} y={y + 41} textAnchor="middle" className="factorial-box-subtitle">
+              <text x={resultX + resultBoxWidth / 2} y={y + 41} textAnchor="middle" fill="#e2e8f0" fontSize="13">
                 {returnedText}
               </text>
             </g>
           )
         })}
 
-        <text x="34" y={viewHeight - 30} className="factorial-footer-note">
+        <text x="34" y={viewHeight - 30} fill="#333" fontWeight="bold" fontSize="16">
           결과: factorial(5) = {finalResult ?? '...'}
         </text>
       </svg>

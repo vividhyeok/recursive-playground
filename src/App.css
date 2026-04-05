@@ -55,10 +55,10 @@
 }
 
 .stage-tab.active {
-  background: rgba(47, 129, 247, 0.15);
-  border-color: rgba(47, 129, 247, 0.4);
-  color: #58a6ff;
-  box-shadow: 0 0 12px rgba(47, 129, 247, 0.1);
+  background: #ffffff;
+  border-color: var(--color-border);
+  color: #1f6feb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .stage-tab:disabled {
@@ -72,9 +72,9 @@
 }
 
 .progress-badge {
-  background: rgba(35, 134, 54, 0.2);
-  border: 1px solid rgba(46, 160, 67, 0.4);
-  color: #3fb950;
+  background: #dafbe1;
+  border: 1px solid #4ac26b;
+  color: #1a7f37;
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 0.8rem;
@@ -343,15 +343,15 @@
 }
 
 .toast.warning {
-  background: rgba(43, 30, 6, 0.9);
-  border: 1px solid rgba(210, 153, 34, 0.4);
-  color: #e3b341;
+  background: #fff8c5;
+  border: 1px solid #e3b341;
+  color: #9a6700;
 }
 
 .toast.alert {
-  background: rgba(61, 15, 15, 0.9);
-  border: 1px solid rgba(218, 54, 51, 0.4);
-  color: #ff7b72;
+  background: #ffebe9;
+  border: 1px solid #ff8182;
+  color: #cf222e;
 }
 
 @keyframes slide-up {
