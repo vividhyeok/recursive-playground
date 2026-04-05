@@ -352,20 +352,17 @@ function App() {
   const progressLabel = completion.stage3 ? '모든 구역 정복 완료' : `${progressCount}/3 구역 정복`
 
   return (
-    <div className="app-shell">
-      <header className="app-header">
-        <h1>Recursive Playground</h1>
-        <p>Blockly 스타일 편집기 + 실행 결과 시각화</p>
-      </header>
-
-      <nav className="stage-row" aria-label="단계 선택">
+    <div className={`ide-layout stage-${activeStageKey}`}>
+      <header className="ide-header glass-panel">
+        <div className="brand-title">Recursive Playground</div>
+        <nav className="stage-selector" aria-label="단계 선택">
           {STAGE_ORDER.map((stageKey) => {
             const stage = STAGES[stageKey]
             const unlocked = unlockedStages[stageKey]
             const active = stageKey === activeStageKey
             return (
               <button
-                className={`stage-chip ${active ? 'active' : ''}`}
+                className={`stage-tab ${active ? 'active' : ''}`}
                 disabled={!unlocked}
                 key={stageKey}
                 onClick={() => {
@@ -375,42 +372,103 @@ function App() {
                 }}
                 type="button"
               >
-                <strong>Stage {stage.number}</strong>
-                <span>{stage.shortLabel}</span>
+                Stage {stage.number}: {stage.shortLabel}
               </button>
             )
           })}
-      </nav>
+        </nav>
+        <div className="header-status">
+          <span className="progress-badge">{progressLabel}</span>
+        </div>
+      </header>
 
-      <section className="stage-summary">
-        <strong>{activeStage.missionName}</strong>
-        <span>{activeStage.subtitle}</span>
-        <em>{progressLabel}</em>
-      </section>
-
-      <main className="workspace">
-        <section className="editor-pane">
-          <div className="pane-head">
-            <h2>{activeStage.title}</h2>
-            <div className="mode-toggle" role="tablist" aria-label="코드 입력 방식">
-                <button
-                  className={editorMode === 'blocks' ? 'selected' : ''}
-                  onClick={() => setEditorMode('blocks')}
-                  type="button"
-                >
-                  블록 코딩
-                </button>
-                <button
-                  className={editorMode === 'python' ? 'selected' : ''}
-                  onClick={() => setEditorMode('python')}
-                  type="button"
-                >
-                  파이썬 코드
-                </button>
+      <main className="ide-main">
+        {/* Left Pane: Game/Preview */}
+        <section className="game-pane window-panel">
+          <header className="pane-header">
+            <div className="title-group">
+              <h2>{activeStage.arenaName}</h2>
+              <span className="subtitle">{activeStage.missionName}</span>
             </div>
+            <div className="telemetry-bar">
+              <span className="metric">깊이 {telemetry.maxDepth}</span>
+              <span className="metric">이동 {telemetry.moves}</span>
+              <span className="metric">호출 {telemetry.calls}</span>
+              <span className="metric">반환 {telemetry.returns}</span>
+            </div>
+          </header>
+
+          <div className="visualizer-viewport">
+            <StageVisualization execution={activeExecution} speed={speed} stageKey={activeStageKey} />
           </div>
 
-          <div className="editor-frame">
+          <div className="execution-hud glass-panel">
+            <div className="playback-controls">
+              <button
+                className={`play-btn ${isRunning ? 'running' : ''}`}
+                disabled={isRunning}
+                onClick={() => executeStage({ autoPlay: true })}
+                type="button"
+                title="전체 실행 (Enter)"
+              >
+                {isRunning ? '추적 중...' : '▶ 실행'}
+              </button>
+              <button 
+                className="step-btn" 
+                disabled={isRunning} 
+                onClick={handleStep} 
+                type="button"
+                title="한 단계 (Space)"
+              >
+                한 단계
+              </button>
+            </div>
+            
+            <div className="speed-slider">
+              <span>속도</span>
+              <input
+                max="2"
+                min="0.6"
+                onChange={(event) => setSpeed(Number(event.target.value))}
+                step="0.1"
+                type="range"
+                value={speed}
+              />
+              <strong>{speed.toFixed(1)}x</strong>
+            </div>
+
+            <div className="run-status">
+              <span className="status-text">{statusMessage || activeStage.readyMessage}</span>
+              <span className="result-badge">결과: <strong>{activeExecution.result ?? '대기 중'}</strong></span>
+            </div>
+          </div>
+        </section>
+
+        {/* Right Pane: Code Editor */}
+        <section className="code-pane window-panel">
+          <header className="pane-header">
+            <h2>{activeStage.title}</h2>
+            <div className="mode-toggle" role="tablist">
+              <button
+                className={editorMode === 'blocks' ? 'selected' : ''}
+                onClick={() => setEditorMode('blocks')}
+                type="button"
+                title="단축키: 1"
+              >
+                블록 코딩
+              </button>
+              <button
+                className={editorMode === 'python' ? 'selected' : ''}
+                onClick={() => setEditorMode('python')}
+                type="button"
+                title="단축키: 2"
+              >
+                파이썬
+              </button>
+            </div>
+          </header>
+
+          <div className="editor-viewport">
             {editorMode === 'blocks' ? (
               <BlocklyEditor
                 key={`${activeStageKey}-blocks`}
@@ -428,69 +486,15 @@ function App() {
               />
             )}
           </div>
-
-          <div className="control-deck">
-            <button
-              className="primary"
-              disabled={isRunning}
-              onClick={() => executeStage({ autoPlay: true })}
-              type="button"
-            >
-              {isRunning ? '추적 중...' : '실행'}
-            </button>
-            <button className="secondary" disabled={isRunning} onClick={handleStep} type="button">
-              한 단계
-            </button>
-            <label className="speed-control">
-              <span>재생 속도</span>
-              <input
-                max="2"
-                min="0.6"
-                onChange={(event) => setSpeed(Number(event.target.value))}
-                step="0.1"
-                type="range"
-                value={speed}
-              />
-              <strong>{speed.toFixed(1)}x</strong>
-            </label>
-          </div>
-
-          <div className="shortcut-hint">단축키: Enter 실행, Space 한 단계, 1/2 모드 전환</div>
-
-          <div className={`status-card ${activeExecution.error ? 'error' : ''}`}>
-            <strong>상태</strong>
-            <p>{statusMessage || activeStage.readyMessage}</p>
-            {pythonWarning ? <p className="warning">{pythonWarning}</p> : null}
-            {isRunStale && activeExecution.trace.length ? (
-              <p className="warning">
-                마지막 추적 이후 코드가 바뀌었습니다. 실행을 다시 눌러 월드를 새로 생성하세요.
-              </p>
-            ) : null}
-          </div>
-        </section>
-
-        <section className="preview-pane">
-          <div className="pane-head">
-            <h2>{activeStage.arenaName}</h2>
-            <div className="arena-readouts">
-              <span>
-                {activeExecution.playhead}/{activeExecution.trace.length}
-              </span>
-              <span>깊이 {telemetry.maxDepth}</span>
-              <span>이동 {telemetry.moves}</span>
+          
+          {(pythonWarning || (isRunStale && activeExecution.trace.length > 0)) && (
+            <div className="editor-notifications">
+              {pythonWarning && <div className="toast warning">{pythonWarning}</div>}
+              {(isRunStale && activeExecution.trace.length > 0) && (
+                <div className="toast alert">코드가 변경되었습니다. 다시 실행하세요.</div>
+              )}
             </div>
-          </div>
-
-          <div className="visual-frame">
-            <StageVisualization execution={activeExecution} speed={speed} stageKey={activeStageKey} />
-          </div>
-
-          <div className="preview-status">
-            <span>호출 {telemetry.calls}</span>
-            <span>반환 {telemetry.returns}</span>
-            <span>결과 {activeExecution.result ?? '대기 중'}</span>
-            <span>{completion[activeStageKey] ? '클리어' : '진행 중'}</span>
-          </div>
+          )}
         </section>
       </main>
     </div>
