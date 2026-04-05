@@ -50,3 +50,15 @@ export function persistStageCompletion(stageKey, complete) {
 
   storage.setItem(getStorageKey(stageKey, 'complete'), String(Boolean(complete)))
 }
+
+export function clearAllProgress() {
+  const storage = safeLocalStorage()
+  if (!storage) return
+
+  const keysToRemove = []
+  for (let i = 0; i < storage.length; i++) {
+    const key = storage.key(i)
+    if (key && key.startsWith('rp_')) keysToRemove.push(key)
+  }
+  keysToRemove.forEach(k => storage.removeItem(k))
+}

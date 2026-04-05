@@ -11,7 +11,7 @@ import MazeVisualizer from './components/MazeVisualizer.jsx'
 import PythonEditor from './components/PythonEditor.jsx'
 import { STAGES, STAGE_ORDER, getInitialStage, isStageUnlocked } from './data/stages'
 import { runStudentCode } from './lib/pyodideRunner'
-import { persistStageCode, persistStageCompletion, readStoredProgress } from './lib/storage'
+import { persistStageCode, persistStageCompletion, readStoredProgress, clearAllProgress } from './lib/storage'
 import { simulateHanoi } from './lib/stageUtils'
 
 function buildWorkspaceState(storedProgress) {
@@ -373,6 +373,12 @@ function App() {
   const progressCount = Object.values(completion).filter(Boolean).length
   const progressLabel = progressCount === STAGE_ORDER.length ? '모든 구역 정복 완료' : `${progressCount}/${STAGE_ORDER.length} 구역 정복`
 
+  function handleReset() {
+    if (!window.confirm('진행 데이터(완료 여부 + 작성한 코드)를 모두 초기화하시겠습니까?')) return
+    clearAllProgress()
+    window.location.reload()
+  }
+
   return (
     <div className={`ide-layout stage-${activeStageKey}`}>
       <header className="ide-header glass-panel">
@@ -401,6 +407,14 @@ function App() {
         </nav>
         <div className="header-status">
           <span className="progress-badge">{progressLabel}</span>
+          <button
+            className="reset-btn"
+            onClick={handleReset}
+            type="button"
+            title="모든 진행 데이터와 코드를 초기화합니다"
+          >
+            초기화
+          </button>
         </div>
       </header>
 

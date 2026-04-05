@@ -69,6 +69,7 @@
 .header-status {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .progress-badge {
@@ -79,6 +80,24 @@
   border-radius: 12px;
   font-size: 0.8rem;
   font-weight: 600;
+}
+
+.reset-btn {
+  background: transparent;
+  border: 1px solid #d1d9e0;
+  color: var(--color-text-secondary);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reset-btn:hover {
+  background: #ffebe9;
+  border-color: #ff8182;
+  color: #cf222e;
 }
 
 /* --- Main Split Content --- */

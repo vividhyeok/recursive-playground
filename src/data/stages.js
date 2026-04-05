@@ -76,7 +76,16 @@ export const STAGES = {
     },
     defaultWorkspace: () => buildWorkspace('rp_countdown_function'),
     parseToWorkspace: parseDummy('rp_countdown_function'),
-    validate: ({ trace }) => trace.some(t => t.type === 'call' && Number(t.args.n) <= 0),
+    validate: ({ trace }) => {
+      const calls = trace.filter(t => t.type === 'call')
+      const nValues = calls.map(t => Number(t.args.n))
+      // Must have at least 5 calls (n=5,4,3,2,1,0 → 6 steps)
+      // Must reach n<=0 AND must not go below -1 (i.e., base case fired correctly)
+      const reachedZero = nValues.some(n => n <= 0)
+      const hasProperDepth = calls.length >= 5
+      const didNotOverRecurse = nValues.every(n => n >= -1) // base case must have stopped it
+      return reachedZero && hasProperDepth && didNotOverRecurse
+    },
     successMessage: '✅ 0까지 카운트다운 완료! 기저 조건 + 재귀 호출 구조를 이해했습니다.',
   },
 
@@ -117,7 +126,24 @@ export const STAGES = {
     },
     defaultWorkspace: () => buildWorkspace('rp_factorial_function'),
     parseToWorkspace: parseDummy('rp_factorial_function'),
-    validate: ({ result }) => Number(result) === 120,
+    validate: ({ result, trace }) => {
+      if (Number(result) !== 120) return false
+      // Must have recursive calls — 'return 120' shortcut only creates 1 call
+      const calls = trace.filter(t => t.type === 'call')
+      if (calls.length < 5) return false
+      // Every level must have returned the correct intermediate value
+      const returns = trace.filter(t => t.type === 'return')
+      // factorial(1) must return 1, factorial(2) must return 2, factorial(3)=6, factorial(4)=24, factorial(5)=120
+      const expectedReturns = new Map([[1, 1], [2, 2], [3, 6], [4, 24], [5, 120]])
+      for (const [n, expected] of expectedReturns) {
+        const ret = returns.find(r => {
+          const matchingCall = calls.find(c => Number(c.args.n) === n)
+          return matchingCall && Number(r.value) === expected
+        })
+        if (!ret) return false
+      }
+      return true
+    },
     successMessage: '✅ factorial(5) = 120 정답! 반환값을 이용한 재귀를 이해했습니다.',
   },
 
@@ -158,7 +184,15 @@ export const STAGES = {
     },
     defaultWorkspace: () => buildWorkspace('rp_quadtree_function'),
     parseToWorkspace: parseDummy('rp_quadtree_function'),
-    validate: ({ trace }) => trace.filter(t => t.type === 'call').length > 20,
+    validate: ({ trace }) => {
+      const calls = trace.filter(t => t.type === 'call')
+      if (calls.length < 20) return false
+      // Require multiple distinct size values to prove real 4-way spatial splitting
+      const sizes = new Set(calls.map(t => Number(t.args.size)).filter(s => s > 0))
+      // A correct quadtree with base=1 from size=16 visits sizes: 16, 8, 4, 2, 1
+      // Require at least 3 distinct sizes so a simple loop-of-calls can't fake it
+      return sizes.size >= 3
+    },
     successMessage: '✅ 화면 분할 성공! 다중 재귀 호출의 폭발적인 확장을 체험했습니다.',
   },
 
@@ -201,7 +235,14 @@ export const STAGES = {
     parseToWorkspace: parseDummy('rp_reverse_function'),
     validate: ({ trace }) => {
       const calls = trace.filter(t => t.type === 'call')
-      return calls.some(t => Number(t.args.left) >= Number(t.args.right))
+      const swaps = trace.filter(t => t.type === 'swap')
+      // Must have actually swapped at least once
+      if (swaps.length === 0) return false
+      // Must have reached the crossing condition (base case)
+      if (!calls.some(t => Number(t.args.left) >= Number(t.args.right))) return false
+      // Must have correct number of swaps: reverse(0,4) has 2 elements to cross (indices 0↔4, 1↔3)
+      if (swaps.length < 2) return false
+      return true
     },
     successMessage: '✅ 배열 뒤집기 성공! 인덱스를 인자로 전달하는 재귀를 이해했습니다.',
   },
@@ -243,7 +284,18 @@ export const STAGES = {
     },
     defaultWorkspace: () => buildWorkspace('rp_maze_function'),
     parseToWorkspace: parseDummy('rp_maze_function'),
-    validate: ({ result }) => result === true,
+    validate: ({ result, trace }) => {
+      if (result !== true) return false
+      // Must have actually called is_exit (check_exit events) — rules out 'return True' trivially
+      const exitChecks = trace.filter(t => t.type === 'check_exit')
+      if (exitChecks.length === 0) return false
+      // Must have explored neighbors (get_neighbors events) — must have navigated the maze
+      const neighborChecks = trace.filter(t => t.type === 'get_neighbors')
+      if (neighborChecks.length === 0) return false
+      // Must have visited enough cells to reach (4,4) from (0,0) — minimum path length is ~8 steps
+      const uniqueCells = new Set(neighborChecks.map(t => `${t.x},${t.y}`))
+      return uniqueCells.size >= 3
+    },
     successMessage: '✅ 미로 탈출 성공! 백트래킹 재귀의 핵심 패턴을 이해했습니다.',
   },
 
