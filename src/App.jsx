@@ -357,8 +357,20 @@ function App() {
     }))
   }
 
+  function handleStop() {
+    setExecutions((current) => ({
+      ...current,
+      [activeStageKey]: {
+        ...current[activeStageKey],
+        isPlaying: false,
+        playhead: 0,
+      },
+    }))
+    setStatusMessage(activeStage.readyMessage)
+  }
+
   const progressCount = Object.values(completion).filter(Boolean).length
-  const progressLabel = completion.stage3 ? '모든 구역 정복 완료' : `${progressCount}/3 구역 정복`
+  const progressLabel = progressCount === STAGE_ORDER.length ? '모든 구역 정복 완료' : `${progressCount}/${STAGE_ORDER.length} 구역 정복`
 
   return (
     <div className={`ide-layout stage-${activeStageKey}`}>
@@ -430,6 +442,15 @@ function App() {
                 title="한 단계 (Space)"
               >
                 한 단계
+              </button>
+              <button 
+                className="step-btn" 
+                onClick={handleStop} 
+                style={{ background: 'rgba(255, 102, 128, 0.1)', borderColor: '#ff6680', color: '#ff6680' }}
+                type="button"
+                title="정지 및 초기화"
+              >
+                ■ 정지
               </button>
             </div>
             

@@ -234,5 +234,11 @@ export const STAGES = {
   },
 }
 
-export function isStageUnlocked() { return true }
+export function isStageUnlocked(stageKey, completions) {
+  if (stageKey === 'stage1') return true
+  const prevIndex = STAGE_ORDER.indexOf(stageKey) - 1
+  if (prevIndex < 0) return true
+  const prevStageKey = STAGE_ORDER[prevIndex]
+  return Boolean(completions[prevStageKey])
+}
 export function getInitialStage() { return 'stage1' }
