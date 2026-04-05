@@ -206,7 +206,7 @@ export const STAGES = {
     title: '최종보스: 하노이 탑',
     subtitle: 'N-1개를 비켜두고 가장 큰 원반을 옮깁니다.',
     concept: '복합 분할 논리 재귀. 모든 교육과정의 끝입니다.',
-    objective: 'hanoi(3)이 모든 원반을 성공적으로 C로 옮겨야 합니다.',
+    objective: 'hanoi(4)이 모든 원반을 성공적으로 C로 옮겨야 합니다.',
     modeHint: '기저 조건 -> 왼쪽 재귀 -> 무브 -> 오른쪽 재귀.',
     worldName: '하노이 신전',
     missionName: '최종 의식',
@@ -215,7 +215,7 @@ export const STAGES = {
     readyMessage: '재귀 트리가 원반의 물리적 움직임으로 변환됩니다.',
     functionName: 'hanoi',
     functionBlockType: 'rp_hanoi_function',
-    entryExpression: "hanoi(3, 'A', 'C', 'B')",
+    entryExpression: "hanoi(4, 'A', 'C', 'B')",
     trackedFunctions: ['hanoi'],
     starterCode: 'def hanoi(n, from_peg, to_peg, aux_peg):\n    pass',
     toolbox: {
@@ -229,16 +229,12 @@ export const STAGES = {
     },
     defaultWorkspace: () => buildWorkspace('rp_hanoi_function'),
     parseToWorkspace: parseDummy('rp_hanoi_function'),
-    validate: ({ pegs }) => pegs?.C?.join(',') === '3,2,1',
+    validate: ({ pegs }) => pegs?.C?.join(',') === '4,3,2,1',
     successMessage: '축하합니다! 하노이 탑을 완벽히 정복했습니다.',
   },
 }
 
 export function isStageUnlocked(stageKey, completions) {
-  if (stageKey === 'stage1') return true
-  const prevIndex = STAGE_ORDER.indexOf(stageKey) - 1
-  if (prevIndex < 0) return true
-  const prevStageKey = STAGE_ORDER[prevIndex]
-  return Boolean(completions[prevStageKey])
+  return true;
 }
 export function getInitialStage() { return 'stage1' }

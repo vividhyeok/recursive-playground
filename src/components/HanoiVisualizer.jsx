@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 import { deriveHanoiCallStack, simulateHanoi } from '../lib/stageUtils'
 
 export default function HanoiVisualizer({ visibleTrace }) {
-  const diskCount = 3
+  const diskCount = 4
   const pegs = useMemo(() => simulateHanoi(visibleTrace, diskCount), [visibleTrace, diskCount])
   const activeStack = useMemo(() => deriveHanoiCallStack(visibleTrace), [visibleTrace])
 
@@ -14,22 +14,21 @@ export default function HanoiVisualizer({ visibleTrace }) {
   const pegLabels = ['A', 'B', 'C']
 
   const getDiskWidth = (diskSize) => {
-    // 1~3 사이즈를 가짐
-    const widths = { 1: 60, 2: 120, 3: 180 }
-    return widths[diskSize] ?? 180
+    // 1~4 사이즈를 가짐
+    const widths = { 1: 50, 2: 90, 3: 130, 4: 170 }
+    return widths[diskSize] ?? 170
   }
 
   const getDiskColor = (diskSize) => {
-    // 1: 파란색, 2: 노란색, 3: 붉은색
-    const colors = { 1: '#4c97ff', 2: '#ffbf00', 3: '#ff6680' }
+    const colors = { 1: '#00d2ff', 2: '#4cbf56', 3: '#ffbf00', 4: '#ff6680' }
     return colors[diskSize] ?? '#4cbf56'
   }
 
   return (
-    <div style={{ padding: '30px 40px', display: 'flex', gap: 40, height: '100%', background: '#ffffff', overflowY: 'auto' }}>
+    <div style={{ padding: '30px 40px 100px 40px', boxSizing: 'border-box', display: 'flex', gap: 40, height: '100%', background: '#ffffff', overflowY: 'auto' }}>
       
       {/* 2D 하노이 탑 그래픽 영역 */}
-      <div style={{ flex: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ flex: 2, display: 'flex', flexDirection: 'column', height: '100%', minWidth: 400 }}>
         <h3 style={{color: '#333'}}>하노이 탑 이동 보드</h3>
         <p style={{color: '#666', marginBottom: 20}}>현재까지 총 <strong>{moveCount}</strong>번 이동 완료</p>
 
@@ -37,7 +36,7 @@ export default function HanoiVisualizer({ visibleTrace }) {
           {pegLabels.map((peg) => (
             <div key={peg} style={{ position: 'relative', width: 200, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
               {/* 기둥 막대기 */}
-              <div style={{ position: 'absolute', bottom: 0, width: 16, height: '80%', background: '#e9eef2', borderRadius: '8px 8px 0 0', zIndex: 0 }} />
+              <div style={{ position: 'absolute', bottom: 0, width: 16, height: '65%', background: '#e9eef2', borderRadius: '8px 8px 0 0', zIndex: 0 }} />
               
               {/* 기둥에 쌓인 원판들 */}
               <div style={{ display: 'flex', flexDirection: 'column-reverse', alignItems: 'center', zIndex: 1, width: '100%' }}>
@@ -46,9 +45,9 @@ export default function HanoiVisualizer({ visibleTrace }) {
                     key={diskSize}
                     style={{
                       width: getDiskWidth(diskSize),
-                      height: 32,
+                      height: 40,
                       background: getDiskColor(diskSize),
-                      borderRadius: 16,
+                      borderRadius: 8,
                       boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
                       marginBottom: 4,
                       display: 'flex',
@@ -57,17 +56,16 @@ export default function HanoiVisualizer({ visibleTrace }) {
                       color: '#fff',
                       fontWeight: 'bold',
                       fontSize: '1.2rem',
-                      transition: 'all 0.15s ease-out',
-                      animation: 'drop-in 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards'
+                      transition: 'all 0.15s ease-out'
                     }}
                   >
-                    원판 {diskSize}
+                    {diskSize}
                   </div>
                 ))}
               </div>
               
               {/* 바닥 기둥 이름표 */}
-              <div style={{ position: 'absolute', bottom: -40, fontWeight: 'bold', fontSize: '1.2rem', color: '#666', padding: '4px 12px', background: '#f4f7f9', borderRadius: 8, border: '1px solid #d1d9e0' }}>
+              <div style={{ position: 'absolute', bottom: -35, fontWeight: 'bold', fontSize: '1.2rem', color: '#666', padding: '4px 12px', background: '#f4f7f9', borderRadius: 8, border: '1px solid #d1d9e0', whiteSpace: 'nowrap' }}>
                 기둥 {peg}
               </div>
             </div>
@@ -135,12 +133,6 @@ export default function HanoiVisualizer({ visibleTrace }) {
         </div>
       </div>
 
-      <style>{`
-        @keyframes drop-in {
-          from { opacity: 0; transform: translateY(-20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </div>
+      </div>
   )
 }

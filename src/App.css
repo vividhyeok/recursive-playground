@@ -266,6 +266,10 @@
 .status-text {
   font-size: 0.8rem;
   color: var(--color-accent);
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .result-badge {
