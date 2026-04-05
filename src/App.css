@@ -313,8 +313,8 @@
   width: 100%;
   height: 100%;
   padding: 20px;
-  background: var(--color-bg-panel);
-  color: #24292e;
+  background: var(--color-bg-panel) !important;
+  color: var(--color-text-primary) !important;
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.6;

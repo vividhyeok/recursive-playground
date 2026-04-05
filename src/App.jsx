@@ -476,6 +476,12 @@ function App() {
             </div>
           </header>
 
+          <div className="stage-info" style={{ padding: '12px 20px', background: 'rgba(0, 0, 0, 0.02)', borderBottom: '1px solid var(--color-border)', fontSize: '0.85rem', color: 'var(--color-text-secondary)', lineHeight: '1.4' }}>
+            <p style={{ margin: '0 0 6px 0' }}><strong style={{color: 'var(--color-text-primary)'}}>문제:</strong> {activeStage.objective}</p>
+            <p style={{ margin: '0 0 6px 0' }}><strong style={{color: 'var(--color-text-primary)'}}>설명:</strong> {activeStage.concept}</p>
+            <p style={{ margin: '0' }}><strong style={{color: 'var(--color-text-primary)'}}>실행 방식:</strong> 코드 실행 시 서버가 보이지 않게 <code>{activeStage.entryExpression}</code> 호출을 시도합니다.</p>
+          </div>
+
           <div className="editor-viewport">
             {editorMode === 'blocks' ? (
               <BlocklyEditor
